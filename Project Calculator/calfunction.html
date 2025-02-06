@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Border image</title>
+    <link rel="stylesheet" href="calfunction.css">
+</head>
+<body>
+    <div id="main_body">
+        <div id="output"></div>
+        <input type="button" value="1" onclick="input_display(value)" class="button">
+        <input type="button" value="2" onclick="input_display(value)" class="button">
+        <input type="button" value="3" onclick="input_display(value)" class="button">
+        <input type="button" value="+" onclick="input_display(value)" class="button">
+        <input type="button" value="4" onclick="input_display(value)" class="button">
+        <input type="button" value="5" onclick="input_display(value)" class="button">
+        <input type="button" value="6" onclick="input_display(value)" class="button">
+        <input type="button" value="-" onclick="input_display(value)" class="button">
+        <input type="button" value="7" onclick="input_display(value)" class="button">
+        <input type="button" value="8" onclick="input_display(value)" class="button">
+        <input type="button" value="9" onclick="input_display(value)" class="button">
+        <input type="button" value="/" onclick="input_display(value)" class="button">
+        <input type="button" value="="  id="btn1" class="button">
+        <input type="button" value="0" onclick="input_display(value)" class="button">
+        <input type="button" value="c" onclick="input_display(value)" class="button">
+        <input type="button" value="*" onclick="input_display(value)" class="button">
+    </div>
+    
+</body>
+<script>
+
+</script>
+    <script>
+        function input_display(value){
+            if(value == "c"){
+                console.log("All cleared");
+                document.getElementById('output').innerHTML=" ";
+            }else if(value== '+'||value=="-"||value=="*"||value=="/"){ 
+                console.log('operator used!!');
+                document.getElementById('output').innerHTML += " "+value+" ";
+            }
+            else if(value != "c" ){
+                document.getElementById('output').innerHTML+=value;
+                
+            
+        }}
+        const btn = document.getElementById('btn1');
+        btn.addEventListener("click", Sum);
+        function Sum(){
+            let value = document.getElementById('output').innerHTML
+            console.log(value);
+            let valueafter = 0;
+            let arr = value.split(' ');
+            if(arr.length==3){
+                if(arr[1]=="+"){
+                    console.log("+")
+                    let numbers = value.split('+');
+                    console.log(numbers);
+                    valueafter = Number(numbers[0]) + Number(numbers[1]);
+                    console.log(valueafter);
+                    document.getElementById('output').textContent = valueafter;
+                    console.log(valueafter);
+                }else if(arr[1]=="-"){
+                    console.log("-")
+                    let numbers = value.split('-');
+                    console.log(numbers);
+                    valueafter = Number(numbers[0]) - Number(numbers[1]);
+                    console.log(valueafter);
+                    document.getElementById('output').textContent = valueafter;
+                    console.log(valueafter);
+                }else if(arr[1]=="*"){
+                    console.log("*")
+                    let numbers = value.split('*');
+                    console.log(numbers);
+                    valueafter = Number(numbers[0]) * Number(numbers[1]);
+                    console.log(valueafter);
+                    document.getElementById('output').textContent = valueafter;
+                    console.log(valueafter);
+                }else if(arr[1]=="/"){
+                    console.log("/")
+                    let numbers = value.split('/');
+                    console.log(numbers);
+                    valueafter = Number(numbers[0]) / Number(numbers[1]);
+                    console.log(valueafter);
+                    document.getElementById('output').textContent = valueafter;
+                    console.log(valueafter);
+                }
+            }else if(arr.length == 5){
+                   if(arr[1]== "+"){
+                    if(arr[3]=="+"){
+                        console.log("+");
+                        let numbers = value.split('+');
+                        console.log(numbers);
+                        valueafter=Number(numbers[0])+ Number(numbers[1])+ Number(numbers[2]) ;
+                        document.getElementById('output').textContent = valueafter;
+                    }
+                    else if(arr[3]=="-"){
+                        console.log("-");
+                        let numbers = value.split(' ');
+                        console.log(numbers);
+                        valueafter=Number(numbers[0])+ Number(numbers[2])- Number(numbers[4]) ;
+                        document.getElementById('output').textContent = valueafter;
+                    }
+                    else if(arr[3]=="*"){
+                        console.log("*");
+                        let numbers = value.split(' ');
+                        console.log(numbers);
+                        valueafter=(Number(numbers[0])+ Number(numbers[2]))* Number(numbers[4]) ;
+                        document.getElementById('output').textContent = valueafter;
+                    }
+                    else if(arr[3]=="/"){
+                        console.log("/");
+                        let numbers = value.split(' ');
+                        console.log(numbers);
+                        valueafter=(Number(numbers[0])+ Number(numbers[2]))/ Number(numbers[4]) ;
+                        document.getElementById('output').textContent = valueafter;
+                    }
+                   }
+                   else if(arr[1]== "-"){
+                    if(arr[3]=="+"){
+                        console.log("+");
+                        let numbers = value.split(' ');
+                        console.log(numbers);
+                        valueafter=Number(numbers[0])- Number(numbers[2])+ Number(numbers[4]) ;
+                        document.getElementById('output').textContent = valueafter;
+                    }
+                    else if(arr[3]=="-"){
+                        console.log("-");
+                        let numbers = value.split(' ');
+                        console.log(numbers);
+                        valueafter=Number(numbers[0])- Number(numbers[2])- Number(numbers[4]) ;
+                        document.getElementById('output').textContent = valueafter;
+                    }
+                    else if(arr[3]=="*"){
+                        console.log("*");
+                        let numbers = value.split(' ');
+                        console.log(numbers);
+                        valueafter=(Number(numbers[0])- Number(numbers[2]))* Number(numbers[4]) ;
+                        document.getElementById('output').textContent = valueafter;
+                    }
+                    else if(arr[3]=="/"){
+                        console.log("/");
+                        let numbers = value.split(' ');
+                        console.log(numbers);
+                        valueafter=(Number(numbers[0])- Number(numbers[2]))/Number(numbers[4]) ;
+                        document.getElementById('output').textContent = valueafter;
+                    }
+                   }
+                   else if(arr[1]== "*"){
+                    if(arr[3]=="+"){
+                        console.log("+");
+                        let numbers = value.split(' ');
+                        console.log(numbers);
+                        valueafter=Number(numbers[0])* Number(numbers[2])+ Number(numbers[4]) ;
+                        document.getElementById('output').textContent = valueafter;
+                    }
+                    else if(arr[3]=="-"){
+                        console.log("-");
+                        let numbers = value.split(' ');
+                        console.log(numbers);
+                        valueafter=Number(numbers[0])* Number(numbers[2])- Number(numbers[4]) ;
+                        document.getElementById('output').textContent = valueafter;
+                    }
+                    else if(arr[3]=="*"){
+                        console.log("*");
+                        let numbers = value.split(' ');
+                        console.log(numbers);
+                        valueafter=(Number(numbers[0])* Number(numbers[2]))* Number(numbers[4]) ;
+                        document.getElementById('output').textContent = valueafter;
+                    }
+                    else if(arr[3]=="/"){
+                        console.log("/");
+                        let numbers = value.split(' ');
+                        console.log(numbers);
+                        valueafter=(Number(numbers[0])* Number(numbers[2]))/ Number(numbers[4]) ;
+                        document.getElementById('output').textContent = valueafter;
+                    }
+                   }
+                   else if(arr[1]== "/"){
+                    if(arr[3]=="+"){
+                        console.log("+");
+                        let numbers = value.split(' ');
+                        console.log(numbers);
+                        valueafter=Number(numbers[0])/ Number(numbers[2])+ Number(numbers[4]) ;
+                        document.getElementById('output').textContent = valueafter;
+                    }
+                    else if(arr[3]=="-"){
+                        console.log("-");
+                        let numbers = value.split(' ');
+                        console.log(numbers);
+                        valueafter=Number(numbers[0])/ Number(numbers[2])- Number(numbers[4]) ;
+                        document.getElementById('output').textContent = valueafter;
+                    }
+                    else if(arr[3]=="*"){
+                        console.log("*");
+                        let numbers = value.split(' ');
+                        console.log(numbers);
+                        valueafter=(Number(numbers[0])/ Number(numbers[2]))* Number(numbers[4]) ;
+                        document.getElementById('output').textContent = valueafter;
+                    }
+                    else if(arr[3]=="/"){
+                        console.log("/");
+                        let numbers = value.split(' ');
+                        console.log(numbers);
+                        valueafter=(Number(numbers[0])/ Number(numbers[2]))/ Number(numbers[4]) ;
+                        document.getElementById('output').textContent = valueafter;
+                    }
+                   }
+            }
+        }
+    </script>
+</html>
