@@ -85,6 +85,10 @@
         </div>
     </section>
     <script>
+        let btn_1 = document.getElementById('btn-1') 
+        let btn_2 = document.getElementById('btn-2') 
+        let btn_3 = document.getElementById('btn-3') 
+        let btn_4 = document.getElementById('btn-4') 
         const color = () => {
             let hexcode = "#"
             let colorsec = "0123456789abcdef"
@@ -98,13 +102,13 @@
         clr3 = color();
         clr4 = color();
         document.getElementById('cont-1').style.background = clr1;
-        document.getElementById('btn-1').innerText = clr1;
+        btn_1.innerText = clr1;
         document.getElementById('cont-2').style.background = clr2;
-        document.getElementById('btn-2').innerText = clr2;
+        btn_2.innerText = clr2;
         document.getElementById('cont-3').style.background = clr3;
-        document.getElementById('btn-3').innerText = clr3;
+        btn_3.innerText = clr3;
         document.getElementById('cont-4').style.background = clr4;
-        document.getElementById('btn-4').innerText = clr4;
+        btn_4.innerText = clr4;
 
         colorchange = () => {
             clr1 = color();
@@ -112,37 +116,34 @@
             clr3 = color();
             clr4 = color();
             document.getElementById('cont-1').style.background = clr1;
-            document.getElementById('btn-1').innerText = clr1;
+            btn_1.innerText = clr1;
             document.getElementById('cont-2').style.background = clr2;
-            document.getElementById('btn-2').innerText = clr2;
+            btn_2.innerText = clr2;
             document.getElementById('cont-3').style.background = clr3;
-            document.getElementById('btn-3').innerText = clr3;
+            btn_3.innerText = clr3;
             document.getElementById('cont-4').style.background = clr4;
-            document.getElementById('btn-4').innerText = clr4;
-        let text1 = clr1;
-        let text2 = clr2;
-        let text3 = clr3;
-        let text4 = clr4;
+            btn_4.innerText = clr4;
         }
-        let text1 = clr1;
-        let text2 = clr2;
-        let text3 = clr3;
-        let text4 = clr4;
 
         document.getElementById('change-btn').addEventListener("click", colorchange);
-
-        const copyContent = async (text) => {
-            try {
-                await navigator.clipboard.writeText(text);
-                console.log('Content copied to clipboard');
-            } catch (err) {
-                console.log('Failed to copy: ', err);
-            }
-        }
-        document.getElementById('btn-1').addEventListener("click", copyContent(text1));
-        document.getElementById('btn-2').addEventListener("click", copyContent(text2));
-        document.getElementById('btn-3').addEventListener("click", copyContent(text3));
-        document.getElementById('btn-4').addEventListener("click", copyContent(text4));
+        
+        
+        btn_1.addEventListener("click", (()=>{
+            navigator.clipboard.writeText(clr1);
+            console.log('copied-1')
+        }));
+        btn_2.addEventListener("click", (()=>{
+            navigator.clipboard.writeText(clr2);
+            console.log('copied-2')
+        }));
+        btn_3.addEventListener("click", (()=>{
+            navigator.clipboard.writeText(clr3);
+            console.log('copied-3')
+        }));
+        btn_4.addEventListener("click", (()=>{
+            navigator.clipboard.writeText(clr4);
+            console.log('copied-4')
+        }));
     </script>
 </body>
 
