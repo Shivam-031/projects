@@ -119,12 +119,19 @@
             document.getElementById('btn-3').innerText = clr3;
             document.getElementById('cont-4').style.background = clr4;
             document.getElementById('btn-4').innerText = clr4;
+        let text1 = clr1;
+        let text2 = clr2;
+        let text3 = clr3;
+        let text4 = clr4;
         }
+        let text1 = clr1;
+        let text2 = clr2;
+        let text3 = clr3;
+        let text4 = clr4;
 
         document.getElementById('change-btn').addEventListener("click", colorchange);
 
-        let text = clr1;
-        const copyContent = async () => {
+        const copyContent = async (text) => {
             try {
                 await navigator.clipboard.writeText(text);
                 console.log('Content copied to clipboard');
@@ -132,10 +139,10 @@
                 console.log('Failed to copy: ', err);
             }
         }
-        document.getElementById('btn-1').addEventListener("click", copyContent);
-        document.getElementById('btn-2').addEventListener("click", copyContent);
-        document.getElementById('btn-3').addEventListener("click", copyContent);
-        document.getElementById('btn-4').addEventListener("click", copyContent);
+        document.getElementById('btn-1').addEventListener("click", copyContent(text1));
+        document.getElementById('btn-2').addEventListener("click", copyContent(text2));
+        document.getElementById('btn-3').addEventListener("click", copyContent(text3));
+        document.getElementById('btn-4').addEventListener("click", copyContent(text4));
     </script>
 </body>
 
