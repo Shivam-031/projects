@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Hub Data Retriver</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            width: 95vw;
+            height: 97vh;
+            background-color: lightskyblue;
+
+        }
+
+        div.container {
+            width: 20vw;
+            min-width: 400px;
+            height: 20vh;
+            min-height: 550px;
+            border-radius: 16px;
+            box-shadow: 25px 18px 20px rgba(41, 41, 41, 0.1);
+            background-color: rgba(231, 231, 231, 0.245);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(0px);
+            border: 1px solid rgba(255, 255, 255, 0.77);
+            backdrop-filter: blur(1px);
+
+  
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        img {
+            width: 40%;
+            border-radius: 50%;
+        }
+
+        h1 {
+            text-transform: capitalize;
+            display: inline;
+            font-family: monospace;
+            font-size: 40px;
+            text-align: center;
+
+        }
+
+        p{
+            font-size:x-large;
+        }
+
+        input,button {
+            padding: 10px 15px;
+            border-radius: 15px;
+            border: 1px solid;
+            transition: 0.3s;
+        }
+        button:hover{
+            transform: scale(1.05);
+            background-color: lightskyblue;
+        }
+
+        div.detailsContainer {
+            height: 300px;
+            text-align: center;
+            visibility: hidden;
+            
+        }
+        span{
+            font-size: 20px;
+        }
+        #following{
+            padding-right: 70px;
+        }
+        #txt{
+            padding-right: 15px;
+        }
+    </style>
+</head>
+<div class="container">
+    <h1>Git Hub Profile Search</h1>
+    <div class="inptContainer">
+        <input type="text" id="githubInput" placeholder="Enter GitHub Profile Name">
+        <button onclick="apifetch()">Search</button>
+    </div>
+    <p id="errorShow"></p>
+    <div class="detailsContainer">
+        <img src="" alt="logo" id="logoImg">
+        <br>
+        <h1 id="name"></h1>
+        <br>
+        <span id="txt">Followers</span>
+        <span>Following</span>
+        <br>
+        <span id="following"></span>
+        <span id="followers"></span>
+        <br>
+        <a href="" id="atag" target="_blank">Read More </a>
+    </div>
+
+
+</div>
+
+<body>
+    <script>
+        const forword = document.getElementById('atag')
+        const input = document.getElementById('githubInput')
+        const image = document.getElementById('logoImg')
+        const ErrorTxt = document.getElementById('errorShow')
+        const name = document.getElementById('name')
+        const foll1 = document.getElementById('followers')
+        const foll2 = document.getElementById('following')
+        const cont =document.getElementsByClassName('detailsContainer')[0]
+        async function apifetch() {
+            try {
+                if(input.value==""){
+                    alert("please enter some github username");
+                    cont.style.setProperty("visibility", "hidden")
+                    return;
+                }
+                username= input.value;
+                const apiurl = `https://api.github.com/users/${username}`;
+                const api = await fetch(apiurl);
+                if (!api.ok) {
+                    ErrorTxt.textContent = "Something Went Wrong"
+                    cont.style.setProperty("visibility", "hidden")
+                    throw new Error("Something Went Worng")
+                }
+                ErrorTxt.textContent = ""
+                let data = await api.json();
+                
+                const { login, followers, following ,avatar_url,html_url} = data
+                
+                name.textContent = login;
+                foll1.textContent = followers;
+                foll2.textContent =following;
+                forword.href = html_url;
+                image.src=avatar_url
+                cont.style.setProperty("visibility", "visible")
+                
+                return data;
+            } catch (error) {
+                ErrorTxt.textContent = "Something Went Wrong"
+                console.log("Error: " + error)
+            } finally {
+                console.log("Task Complete")
+                input.value = ""
+            }
+            
+        }
+        
+        input.addEventListener("keypress",((event)=>{
+            if(event.key=="Enter"){
+                apifetch();
+                return;
+            }else{
+                return;
+            }
+        }))
+
+    </script>
+</body>
+
+</html>

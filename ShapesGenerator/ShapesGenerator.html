@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shape Generator</title>
+    <style>
+        body{
+            display: flex ;
+            flex-direction: column;
+            align-items: center;
+            background:#ccc;
+            
+        }
+        h1{
+            margin-top: 20px;
+        }
+        .basicStyle{
+            width: 200px;
+            height: 200px;
+            
+        }
+        .boxcont{
+            border-radius: 15px;
+            box-shadow: 5px 5px 25px #555555;
+            background-color: white;
+            padding: 150px 40px;
+            text-align: center;
+            display: grid;
+            grid-template-rows: 60px 60px;
+            grid-template-columns: repeat(3,1fr);
+            margin-bottom: 20px;
+        }
+        #number{
+            grid-row: 1;
+            grid-column: 1/2;
+            height: 30px;
+            width: 200px;
+            padding: 10px;
+            border-radius: 15px;
+        }
+        #color{
+            grid-row: 1;
+            grid-column: 2/3;
+            margin: 0px 10px;
+            width: 200px;
+            height: 50px;
+        
+        }
+        #shapes{
+            grid-template-columns: 3/4;
+            grid-row: 1;
+            margin: 0;
+            width: 200px;
+            height: 50px;
+        
+        }
+        button{
+            
+            grid-column: 2/3;
+            margin: 50px 0px;
+            padding:40px;
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            border-radius:15px ;
+        }
+
+        #box1{
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        
+        .circle{
+            border-radius: 50%;
+        }
+        .rectangle{
+            width: 400px;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Shape Generator</h1>
+    <div class="boxcont">
+        <input type="number" id="number" placeholder="number of shapes">
+        <input type="color" id="color">
+        <select name="shape" id="shapes" >
+            <option value="1">Circle</option>
+            <option value="2" selected>Square</option>
+            <option value="3">Rectangle</option>
+        </select>
+        <button type="button" onclick="genrate()"> Genrate</button>
+    </div>
+    <div id="box1">
+
+    </div>
+    <script>
+        const number = document.getElementById('number');
+        const color = document.getElementById('color');
+        const shape = document.getElementById('shapes');
+        const box = document.getElementById('box1');
+        let sp;
+        function genrate(){
+            if(number.value===""){
+                alert("please enter the number of shapes");
+                return;
+            }
+            box.innerHTML = " "
+            for(let i=0;i<number.value;i++){
+                if(shape.value==1){
+                    console.log("circle");
+                    sp="circle";
+                }
+                else if (shape.value==2){
+                    console.log("square");
+                    sp="square";
+                }
+                else if (shape.value==3){
+                    console.log("rectangle");
+                    sp="rectangle";
+                }
+                const fig = document.createElement('div')
+                fig.className = "basicStyle"
+                
+                fig.classList.add(sp);
+                fig.style.background=color.value
+                box.appendChild(fig);
+            }
+            
+        }
+    </script>
+</body>
+</html>

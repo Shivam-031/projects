@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            background: #ccc;
+            text-align: center;
+            align-items: center;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #container,
+        #container2 {
+            padding: 40px 60px;
+            border-radius: 15px;
+            box-shadow: 10px 10px 20px lightslategray;
+            background: white;
+            width: auto;
+            margin: 20px;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-family: monospace;
+            font-size: 40px;
+        }
+
+        input {
+            padding: 10px 20px;
+            border-radius: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border-radius: 30px;
+            background: yellowgreen;
+        }
+        #container2{
+            width: auto;
+        }
+    
+        li {
+            font-size: 25px;
+            width: auto;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            text-transform: capitalize;
+        }
+
+        li>button {
+            margin-left: 40px;
+            background-color: yellow;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <h1>TODO LIST</h1>
+        <input type="text" id="text-inpt" placeholder="enter task to add">
+        <button type="button" id="add_btn" onclick="add_task()">Add</button>
+    </div>
+    <div id="container2">
+        <ol id="list" style=""></ol>
+        <button id="del_all_button" style="background-color: red; color: white;" onclick="Del_all()">Delete All</button>
+    </div>
+    <script>
+
+        const input = document.getElementById('text-inpt')
+        const addbtn = document.getElementById('add_btn')
+        const list = document.getElementById('list')
+        const delBtn = document.getElementById('del_all_button')
+        const cont2 = document.getElementById('container2')
+        taskcheck();
+        let storage = [];
+        const storageget=()=>{
+            storage= JSON.parse(localStorage.getItem("todoItem")) || [];
+        } 
+        storageget();
+        
+       
+        const storagepush = (data) =>{
+        storage.push(data.trim())
+        let setarr = new Set(storage)
+        storage = [...setarr]
+        localStorage.setItem("todoItem",JSON.stringify(storage));
+       }
+        const storagepushAfterdelete = (data) =>{
+        storage=storage.filter((currElement)=>{
+            return data !== currElement+"Delete";
+        });
+        localStorage.setItem("todoItem",JSON.stringify(storage));
+        }
+        
+        const storagepushAfterdeleteAll = (data) =>{
+            storage=[]
+            console.log(storage)
+            
+            // let setarr = new Set(storage)
+            // storage = [...setarr]
+            localStorage.setItem("todoItem",JSON.stringify(storage));
+        }
+      
+       
+       
+        const listcreate = (val)=>{
+        const li = document.createElement('li');
+            const Deletebtn = document.createElement('button')
+            Deletebtn.textContent = "Delete";
+            Deletebtn.addEventListener("click", () => {
+                li.remove();
+                storagepushAfterdelete(li.textContent);
+                console.log(li.innerText)
+                taskcheck();
+            })
+            li.textContent = val
+            
+            li.appendChild(Deletebtn)
+            list.append(li)
+            taskcheck();
+            storagepush(val);
+       }
+
+       const making = ()=>{
+        for(let i=0;i<storage.length;i++){
+            listcreate(storage[i]);
+        }
+       }
+      
+
+        function add_task() {
+            const inp = input.value;
+            if (inp === "") {
+                alert("enter some task first")
+                return;
+            }
+            listcreate(inp);
+            input.value = " ";
+        }
+       
+        input.addEventListener("keypress",(e)=>{
+            if(e.key=="Enter"){
+                add_task();
+                return;
+            }
+            else{
+                return;
+            }
+        })
+        making();
+
+        function taskcheck() {
+            if (list.children.length == 0) {
+                delBtn.style.display = "none"
+                cont2.style.display = "none"
+            } else {
+                delBtn.style.display = "block"
+                cont2.style.display = "block"
+            }
+        }
+
+        function Del_all() {
+            list.innerHTML = "";
+            console.log(storage);
+            for(let i=0;i<=storage.length;i++){
+                storagepushAfterdeleteAll(storage[i]);
+            }
+            taskcheck();
+        }
+    </script>
+</body>
+
+</html>

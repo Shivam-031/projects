@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            font-family: monospace;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 95vw;
+            height: 100vh;
+            background: white;
+            background-size: cover !important;
+            background-repeat: no-repeat !important;
+        }
+
+        .grid {
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            height: 600px;
+            gap: 4px;
+            max-width: 800px;
+            background: black;
+
+        }
+
+        .box1 {
+            grid-row: 0/2;
+            grid-column: 1/4;
+            /* border-radius: 15px; */
+            text-align: center;
+            align-content: center;
+            background-size: cover !important;
+            background-repeat: no-repeat !important;
+            /* background: url(img/day.jpg); */
+            font-size: 30px;
+
+        }
+
+        .box2 {
+            grid-row: 2/4;
+            grid-column: 1/4;
+            /* border-radius: 15px; */
+            text-align: center;
+            align-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+
+
+        }
+
+        .box3 {
+            grid-row: 1/4;
+            grid-column: 4/6;
+            /* border-radius: 15px; */
+            text-align: center;
+            align-content: center;
+            background: yellow !important;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-direction: column;
+            box-sizing: content-box;
+
+        }
+
+        .box4 {
+            grid-row: 4/6;
+            grid-column: 1/6;
+            /* border-radius: 15px; */
+            text-align: center;
+            align-content: center;
+            display: grid;
+            background: violet !important;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr;
+        }
+
+        .content {
+
+            margin: 20px 60px;
+            border-radius: 15px;
+        }
+
+        .h1{
+            font-size: 35px !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-sm rounded rounded-2 d-grid  grid p-2" id="main_container">
+        <div class=" box1" id="box1">
+            <h1 id="timeShow" class="display-1 font-monospace"></h1>
+        </div>
+        <div class="bg-info box2">
+            <p class="display-5 font-monospace">Temperature</p>
+            <h1 class="display-1 font-monospace" id="temp"></h1>
+        </div>
+        <div class="bg-danger box3">
+            <div class="info container humidity" id="humidity_container">
+                <img src="img/humidity.png" alt="" width="100">
+                <h1 class="display-2 " id="humidity">
+
+                </h1>
+            </div>
+            <div class="info container max_min" id="humidity_container">
+                <img src="img/temperature.webp" alt="" width="70">
+                <br>
+                <span class="h1 " id="min_temp">
+                    
+                </span>
+                <span class="display-4 ">
+                    -
+                </span>
+                <span class="h1 " id="max_temp">
+                    
+                </span>
+                
+            </div>
+        </div>
+        <div class="bg-danger box4">
+            <div class="content2 content">
+                <h4>Sunrise</h4>
+                <img src="img/sun.png" class="temp_img" alt="img2" id="min_temp_img" width="120">
+                <h1 id="sunRise" class="time font-monospace display-5"></h1>
+            </div>
+            <div class="content1 content">
+                <h4>Sunset</h4>
+                <img src="img/moon.png" class="temp_img" alt="img1" id="max_temp_img" width="120">
+                <h1 id="sunSet" class="time font-monospace display-5"></h1>
+            </div>
+        </div>
+    </div>
+    <script>
+        const apikey = "9n4Jfg58s28NwmatKQZCJDIjCLdZylyu"
+        const humidity = document.getElementById('humidity')
+        const timeh1 = document.getElementById('timeShow')
+        const imgbox1 = document.getElementById('box1')
+        const sunRiseTime = document.getElementById('sunRise')
+        const sunSetTime = document.getElementById('sunSet')
+        const temp = document.getElementById('temp')
+        const container = document.getElementById('main_container')
+        const max_temp = document.getElementById('max_temp')
+        const min_temp = document.getElementById('min_temp')
+        // const max_img = document.getElementById('max_temp_img')
+        // const min_img = document.getElementById('min_temp_img')
+        // max_img.src="https://banner2.cleanpng.com/20180326/lww/avje9i767.webp"
+
+        // const dataexp = {
+        //     cloud_pct: 86,
+        //     feels_like: 24,
+        //     humidity: 41,
+        //     max_temp: 28,
+        //     min_temp: 20,
+        //     sunrise: 1740791748,
+        //     sunset: 1740833410,
+        //     temp: 24,
+        //     wind_degrees: 65,
+        //     wind_speed: 1.98
+        // }
+        const dataReply = {
+            max_temp:"null",
+            min_temp:"null",
+            temp:"null",
+            wind_speed:"null",
+            sunSetTime:"null",
+            sunRiseTime:"null"
+        }
+
+        const setdata = (data) => {
+            max_temp.textContent = data.max_temp + "\u00B0";
+            min_temp.textContent = data.min_temp + "\u00B0";
+            temp.textContent = data.temp + "\u00B0";
+            humidity.textContent = data.wind_speed + "km/h";
+            sunRiseTime.textContent = data.sunRiseTime;
+            sunSetTime.textContent = data.sunSetTime;
+        }
+
+
+        // const setmax_mintemp = (max, min) => {
+            
+        // }
+
+
+        const backgroundWallpaperset = (time) => {
+            if (time >= 6 && time < 18) {
+                container.style.setProperty("background", "black")
+                document.body.style.setProperty("background", "url(img/day_background.jpg)")
+                imgbox1.style.background = "url(img/day.jpg)";
+            } else{
+            //  (time >= 18 && time <= 24 || time < 6) {
+                container.style.setProperty("background", "white")
+                document.body.style.setProperty("background", "url(img/night_background.jpg)")
+
+                timeh1.style.setProperty("color", "white");
+                imgbox1.style.background = "url(img/night.jpg)";
+            }
+            //  } else {
+            //     timeh1.style.setProperty("color", "black");
+            //     console.log("error in hours")
+            //     return;
+            // }
+
+        }
+        const suntime = (sun, moon) => {
+            const sunrisetime = new Date(sun * 1000)
+            const sunsettime = new Date(moon * 1000)
+            const time = sunrisetime.toTimeString()
+            const sunrisetm = time.split(' ');
+            const time2 = sunsettime.toTimeString()
+            const sunsettm = time2.split(' ')
+            // setmax_mintemp(sunrisetm[0], sunsettm[0])
+            dataReply.sunRiseTime = sunrisetm[0];
+            dataReply.sunSetTime = sunsettm[0];
+            console.log(sunsettm[0],sunrisetm[0]);
+        }
+
+
+        const time = () => {
+
+            const date = new Date()
+            const timenow = date.getTime();
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            const seconds = date.getSeconds();
+            if (minutes < "10") {
+                var min = "0" + minutes
+            } else {
+                min = minutes
+            }
+            if (seconds < "10") {
+                var sec = "0" + seconds
+            } else {
+                sec = seconds
+            }
+            timeh1.textContent = hours + ":" + min + ":" + sec
+            backgroundWallpaperset(hours);
+        }
+        setInterval(() => {
+            time()
+        }, 1000)
+
+
+        async function fetchtimerise(lat, lon) {
+            try {
+                const dataResponce = await fetch(`https://api.api-ninjas.com/v1/weather?lat=${lat}&lon=${lon}`, {
+                    headers: {
+                        'X-Api-Key': 'OTqXHAMEZXWMXlSQjV2KGg==HApaTIGihkVGixUz'
+                    }
+                });
+
+                if (!dataResponce.ok) {
+                    throw new Error("Somthing Went Wrong...");
+                }
+                const data = await dataResponce.json()
+                console.log(data)
+                suntime(data.sunrise, data.sunset);
+                setdata(dataReply);
+
+
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        async function fetchapi(locationKey) {
+            try {
+                const dataResponce = await fetch(`http://dataservice.accuweather.com/forecasts/v1/daily/1day/${locationKey}?apikey=${apikey}&metric=true`);
+
+                if (!dataResponce.ok) {
+                    throw new Error("Somthing Went Wrong...");
+                }
+                const data = await dataResponce.json()
+                console.log(data)
+                const {DailyForecasts:{0:{Temperature:{Maximum:{Value:max},Minimum:{Value:min}}}}} = data
+                console.log(min,max);
+                dataReply.max_temp = max;
+                dataReply.min_temp=min;
+                setdata(dataReply);
+                
+                
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        async function fetchapi2(locationKey) {
+            try {
+                const dataResponce2 = await fetch(`http://dataservice.accuweather.com/currentconditions/v1/${locationKey}?apikey=${apikey}&details=true`);
+
+                if (!dataResponce2.ok) {
+                    throw new Error("Somthing Went Wrong...");
+                }
+                const data2 = await dataResponce2.json()
+                console.log(data2)
+                const {0:{WeatherText:type,Temperature:{Metric:{Value:temp}},Wind:{Speed:{Metric:{Value:wind_Speed}}}}} = data2
+                console.log(type,temp,wind_Speed);
+                dataReply.temp = Math.round(temp);
+                dataReply.wind_speed=wind_Speed;
+                setdata(dataReply);
+                
+                
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        
+        // setdata(dataResponce)
+        // fetchap(3146227);
+        
+        async function fetchLocationKey(lat,lon) {
+            try {
+                const reslocation = await fetch(`http://dataservice.accuweather.com/locations/v1/cities/geoposition/search?apikey=${apikey}&q=${lat},${lon}`) 
+                if(!reslocation.ok){
+                    throw new Error("Error Something went Wrong");
+                }
+                const location = await reslocation.json()
+                console.log(location)
+                const {Key} = location
+                console.log(Key)
+                fetchapi(Key);
+                fetchapi2(Key);
+                
+                
+            } catch (error) {
+                console.log("ERROR :"+error)
+            }
+        }
+
+        const locationaccess = () => {
+            const loca = navigator.geolocation.getCurrentPosition((position) => {
+                let lat = position.coords.latitude;
+                let long = position.coords.longitude;
+                console.log(lat,long)
+                fetchtimerise(lat, long)
+                fetchLocationKey(lat, long);
+            })
+        }
+        locationaccess();
+    </script>
+
+</body>
+
+</html>

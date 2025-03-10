@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Finder </title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: monospace;
+            font-weight: 600;
+        }
+        body{
+            background: lightgreen;
+        }
+        div.headingContainer{
+            text-align: center;
+        }
+        div.headingContainer>h1{
+            font-size: 50px;
+        }
+        div.container{
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+        }
+        input{
+            width: 300px;
+        }
+        input,button{
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid;
+        }
+        div#movieContainer{
+            display: flex;
+            flex-wrap: wrap;
+            padding: 30px;
+            gap: 10px;
+            justify-content: center;
+        }
+        /* div#movieContainer:hover>div>h1{
+            display: block;
+        } */
+        div.movieContainer{
+            width: 350px;
+            height: 500px;
+            background:rgba(228, 228, 228, 0.348);
+            box-shadow:10px 10px 10px rgb(0,0,0,0.2);
+            border-radius: 15px;
+            text-align: center;
+            align-items: center;
+            padding: 15px;
+            overflow: hidden;
+            justify-content: center;
+            position: relative;
+        }
+        div.movieContainer:hover>div.innerContainer{
+            height: 400px;
+            visibility: visible;
+        }
+        img.imgSetting{
+            width: 100%;
+            max-width: 400px;
+            z-index: 0;
+            transition: 0.5s;
+            
+        }
+        img.imgSetting:hover{
+            filter: blur(5px);
+        }
+        img.imgSetting:hover~div.innerContainer{
+            height: 400px;
+            visibility: visible;
+            /* bottom: 420px; */
+        }
+        h1.h1Setting{
+            margin-bottom: 5px;
+            font-size: 35px;
+        }
+        div.innerContainer:hover{
+            height: 400px;
+            visibility: visible;
+            /* bottom: 400px; */
+        }
+       img.imgSetting:has(~ .innerContainer:hover) {
+            filter: blur(5px);
+            filter: brightness(0.5);
+        }
+        div.innerContainer{
+            width: 320px;
+            height: 500px;
+            display: flex ;
+            align-items: center;
+            flex-direction: column;
+            justify-content: space-between;
+            color: white;
+            z-index: 2;
+            position: absolute;
+            top: 50px;
+            /* bottom: 490px; */
+            transition: all 0.2s;
+            visibility: hidden;
+        }
+        p{
+            font-size: 20px;
+            
+        }
+        
+    </style>
+</head>
+
+<body>
+    <div class="headingContainer">
+        <h1>Movie Search</h1>
+    </div>
+
+    <div class="container">
+
+        <input type="text" id="inputtxt" placeholder="Enter MovieName You Want To Search">
+        <button onclick="fetchmovie()">Search</button>
+
+    </div>
+    <div id="movieContainer">
+
+    </div>
+    <script>
+        const inpt = document.getElementById('inputtxt')
+        const ky = "93ca3a41";
+        const movieCont = document.getElementById('movieContainer')
+        const movieboxCreater = (imgurl, MovieName,MovieYear,idIBM,type) => {
+            if(!imgurl||!MovieName||!MovieYear||!idIBM||imgurl=="N/A"||MovieName=="N/A"||MovieYear=="N/A"||idIBM=="N/A"){
+                return ;
+            }
+            const div = document.createElement('div')
+            div.setAttribute("class", "movieContainer")
+            const img = document.createElement('img')
+            img.src = imgurl;
+            img.setAttribute("class", "imgSetting")
+            const h1 = document.createElement('h1')
+            h1.textContent = MovieName;
+            h1.setAttribute("class", "h1Setting")
+            const pera = document.createElement('p')
+            pera.textContent = "Movie Year:  "+MovieYear;
+            pera.setAttribute("class","peraSetting")
+            const pera2 = document.createElement('p')
+            pera2.textContent = "IBM ID:  "+idIBM;
+            pera2.setAttribute("class","peraSetting")
+            div.appendChild(img);
+            const pera3 = document.createElement('p')
+            pera3.textContent = "Type:  "+type;
+            pera3.style.textTransform="capitalize"
+            const newDiv = document.createElement('div')
+            newDiv.setAttribute("class","innerContainer");
+            newDiv.appendChild(h1);
+            newDiv.appendChild(pera);
+            newDiv.appendChild(pera2);
+            newDiv.appendChild(pera3);
+            div.appendChild(newDiv);
+            movieCont.appendChild(div);
+
+        }
+       
+        const datadestructure = (Search)=>{
+                 for(let char of Search){
+                     let{Title,Year,imdbID,Poster,Type} = char;
+                     console.log(Title,Year,imdbID,Poster,Type)
+                     movieboxCreater(Poster,Title,Year,imdbID,Type)
+                 }
+                }
+        
+        async function fetchmovie() {
+            try {
+                movieCont.innerHTML="";
+                if (inpt.value == "") {
+                    alert("search box is empty")
+                    return;
+                }
+                const movie = inpt.value;
+                // console.log(movie,ky)
+                const apiUrl = `http://www.omdbapi.com/?s=${movie}&apikey=${ky}`
+
+                const res = await fetch(apiUrl).then(res => res)
+                if (!res.ok) {
+                    throw new Error("something Went Wrong");
+                }
+                const data = await res.json();
+                const { Search } = data
+                console.log(Search)
+                datadestructure(Search)
+                return Search;
+            } catch (error) {
+                console.log(error)
+            } finally {
+                console.log("task complete")
+            }
+
+        }
+        
+        inpt.addEventListener("keypress",(event)=>{
+            if(event.key == "Enter"){
+                fetchmovie();
+                return;
+            }else{
+                return;
+            }
+        })
+
+    </script>
+</body>
+
+</html>
