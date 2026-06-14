@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Movie Finder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --red:     #E63946;
+      --yellow:  #FFD700;
+      --blue:    #1D3557;
+      --blue-m:  #457B9D;
+      --white:   #F1FAEE;
+      --dark:    #0D0D0D;
+      --dark2:   #1A1A1A;
+      --dark3:   #242424;
+      --muted:   #888;
+      --radius:  10px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--white);
+      min-height: 100vh;
+    }
+
+    /* ── VIEWS ── */
+    #view-search { display: block; }
+    #view-detail { display: none; }
+
+    /* ══════════════════════════════════════
+       SEARCH PAGE
+    ══════════════════════════════════════ */
+
+    .s-hero {
+      background: var(--blue);
+      padding: 2.5rem 1.5rem 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .s-hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 60px;
+      background: linear-gradient(to bottom, transparent, var(--dark));
+    }
+    .s-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 64px;
+      letter-spacing: 4px;
+      line-height: 1;
+      color: var(--yellow);
+      text-shadow: 4px 4px 0 var(--red);
+      margin-bottom: 4px;
+    }
+    .s-tagline {
+      font-size: 13px;
+      color: rgba(241,250,238,0.55);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 8px;
+      max-width: 500px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+    .search-input {
+      flex: 1;
+      padding: 14px 18px;
+      font-size: 15px;
+      font-family: inherit;
+      background: rgba(255,255,255,0.1);
+      border: 1.5px solid rgba(255,215,0,0.3);
+      border-radius: var(--radius);
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .search-input::placeholder { color: rgba(241,250,238,0.4); }
+    .search-input:focus { border-color: var(--yellow); background: rgba(255,255,255,0.15); }
+
+    .search-btn {
+      padding: 14px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: background 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .search-btn:hover { background: #c9303c; }
+    .search-btn:active { transform: scale(0.97); }
+
+    /* ── STATUS / FILTERS ── */
+    .s-meta {
+      max-width: 860px;
+      margin: 1.5rem auto 0.75rem;
+      padding: 0 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .s-count {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .s-count span { color: var(--yellow); font-weight: 600; }
+
+    .filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pill {
+      padding: 4px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      border-radius: 20px;
+      border: 1.5px solid #333;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .pill:hover { border-color: var(--yellow); color: var(--yellow); }
+    .pill.active { background: var(--yellow); border-color: var(--yellow); color: var(--dark); }
+
+    /* ── GRID ── */
+    .s-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 14px;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 1.25rem 3rem;
+    }
+
+    /* ── MOVIE CARD ── */
+    .m-card {
+      cursor: pointer;
+      border-radius: var(--radius);
+      overflow: hidden;
+      position: relative;
+      background: var(--dark3);
+      transition: transform 0.22s, box-shadow 0.22s;
+      animation: fadeUp 0.3s ease both;
+    }
+    .m-card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 16px 40px rgba(230,57,70,0.35); }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(18px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    .m-poster-wrap {
+      width: 100%;
+      aspect-ratio: 2/3;
+      position: relative;
+      overflow: hidden;
+    }
+    .m-poster {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+    .m-card:hover .m-poster { transform: scale(1.07); }
+
+    .m-no-poster {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px;
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-m) 100%);
+    }
+
+    /* coloured left-edge accent by type */
+    .m-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0; width: 3px;
+      z-index: 2;
+    }
+    .m-card[data-type="movie"]::before   { background: var(--red); }
+    .m-card[data-type="series"]::before  { background: #1D9E75; }
+    .m-card[data-type="episode"]::before { background: var(--yellow); }
+    .m-card[data-type="game"]::before    { background: var(--blue-m); }
+
+    /* gradient overlay + text at bottom of poster */
+    .m-overlay {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 28px 10px 10px;
+      background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, transparent 100%);
+    }
+    .m-title {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.3;
+      color: #fff;
+      margin-bottom: 3px;
+    }
+    .m-year {
+      font-size: 11px;
+      color: var(--yellow);
+      font-weight: 500;
+    }
+
+    /* type badge */
+    .m-badge {
+      position: absolute;
+      top: 8px; right: 8px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 3px 7px;
+      border-radius: 4px;
+      z-index: 3;
+    }
+    [data-type="movie"]   .m-badge { background: var(--red);    color: #fff; }
+    [data-type="series"]  .m-badge { background: #1D9E75;        color: #fff; }
+    [data-type="episode"] .m-badge { background: var(--yellow);  color: var(--dark); }
+    [data-type="game"]    .m-badge { background: var(--blue-m);  color: #fff; }
+
+    /* ── SKELETON ── */
+    .skel {
+      border-radius: var(--radius);
+      overflow: hidden;
+      animation: fadeUp 0.3s ease both;
+    }
+    .skel-poster {
+      width: 100%; aspect-ratio: 2/3;
+      background: linear-gradient(90deg, #1f1f1f 25%, #2a2a2a 50%, #1f1f1f 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.3s infinite;
+    }
+    .skel-line {
+      height: 10px; border-radius: 5px; margin: 10px 10px 5px;
+      background: linear-gradient(90deg, #1f1f1f 25%, #2a2a2a 50%, #1f1f1f 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.3s infinite;
+    }
+    .skel-line.short { width: 45%; margin-bottom: 12px; }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* ── EMPTY / ERROR ── */
+    .s-empty {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 4rem 1rem;
+    }
+    .s-empty .e-icon { font-size: 52px; margin-bottom: 12px; }
+    .s-empty h3 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+    .s-empty p  { font-size: 14px; color: var(--muted); }
+
+    /* ══════════════════════════════════════
+       DETAIL PAGE
+    ══════════════════════════════════════ */
+    #view-detail {
+      min-height: 100vh;
+      animation: fadeIn 0.35s ease;
+    }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+    .d-back {
+      position: fixed;
+      top: 16px; left: 16px;
+      z-index: 100;
+      background: rgba(13,13,13,0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid #333;
+      color: var(--white);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .d-back:hover { background: var(--red); border-color: var(--red); }
+
+    /* cinematic backdrop strip */
+    .d-backdrop {
+      height: 320px;
+      background: linear-gradient(135deg, var(--blue) 0%, #0d0d0d 70%);
+      position: relative;
+      overflow: hidden;
+    }
+    .d-backdrop-img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0.18;
+      filter: blur(12px) saturate(1.4);
+    }
+    .d-backdrop::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(13,13,13,0.1) 0%, var(--dark) 100%);
+    }
+
+    /* main content area */
+    .d-body {
+      max-width: 860px;
+      margin: -180px auto 0;
+      padding: 0 1.5rem 4rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .d-top {
+      display: flex;
+      gap: 28px;
+      align-items: flex-start;
+      margin-bottom: 2rem;
+    }
+
+    .d-poster {
+      flex-shrink: 0;
+      width: 200px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 3px rgba(255,215,0,0.2);
+    }
+    .d-poster img { width: 100%; display: block; }
+    .d-poster-ph {
+      width: 100%; aspect-ratio: 2/3;
+      background: linear-gradient(135deg, var(--blue), var(--blue-m));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 56px;
+    }
+
+    .d-info { flex: 1; padding-top: 100px; }
+
+    .d-genre-row {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .d-genre-tag {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.5px; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 4px;
+      background: var(--red); color: #fff;
+    }
+    .d-genre-tag:nth-child(2) { background: var(--blue-m); }
+    .d-genre-tag:nth-child(3) { background: #1D9E75; }
+
+    .d-title-main {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(32px, 5vw, 56px);
+      letter-spacing: 2px;
+      line-height: 1;
+      color: var(--white);
+      margin-bottom: 6px;
+    }
+    .d-year-runtime {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .d-year-runtime span { color: var(--yellow); }
+
+    /* ratings row */
+    .d-ratings {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .d-rating {
+      background: var(--dark3);
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 10px 16px;
+      text-align: center;
+      min-width: 80px;
+    }
+    .d-rating .r-val {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--yellow);
+      line-height: 1;
+      margin-bottom: 3px;
+    }
+    .d-rating .r-src {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* plot */
+    .d-section { margin-bottom: 1.75rem; }
+    .d-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 8px;
+    }
+    .d-plot {
+      font-size: 15px;
+      line-height: 1.75;
+      color: rgba(241,250,238,0.82);
+    }
+
+    /* meta table */
+    .d-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .d-meta-item {
+      background: var(--dark3);
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .d-meta-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 4px;
+    }
+    .d-meta-val {
+      font-size: 14px; font-weight: 500; color: var(--white);
+      line-height: 1.3;
+    }
+
+    /* imdb link */
+    .d-imdb-btn {
+      display: inline-flex;
+      align-items: center; gap: 8px;
+      margin-top: 1.5rem;
+      background: var(--yellow);
+      color: var(--dark);
+      font-weight: 700;
+      font-size: 14px;
+      font-family: inherit;
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .d-imdb-btn:hover { background: #e6c200; transform: translateY(-1px); }
+
+    /* detail loading */
+    .d-loading {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 60vh; flex-direction: column; gap: 12px;
+    }
+    .d-spinner {
+      width: 40px; height: 40px;
+      border: 3px solid #333;
+      border-top-color: var(--yellow);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 560px) {
+      .d-top { flex-direction: column; }
+      .d-poster { width: 140px; }
+      .d-info { padding-top: 0; }
+      .d-meta-grid { grid-template-columns: 1fr; }
+      .s-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════ SEARCH VIEW ═══════════ -->
+<div id="view-search">
+  <div class="s-hero">
+    <div class="s-logo">CineFind</div>
+    <div class="s-tagline">Every movie. Every story.</div>
+    <div class="search-bar">
+      <input class="search-input" id="s-input" type="text" placeholder="Search a title…" autocomplete="off" />
+      <button class="search-btn" id="s-btn">Search</button>
+    </div>
+  </div>
+
+  <div class="s-meta" id="s-meta" style="display:none;">
+    <div class="s-count" id="s-count"></div>
+    <div class="filter-pills" id="s-filters">
+      <button class="pill active" data-type="all">All</button>
+      <button class="pill" data-type="movie">Movies</button>
+      <button class="pill" data-type="series">Series</button>
+      <button class="pill" data-type="episode">Episodes</button>
+    </div>
+  </div>
+
+  <div class="s-grid" id="s-grid" role="list"></div>
+</div>
+
+<!-- ═══════════ DETAIL VIEW ═══════════ -->
+<div id="view-detail">
+  <button class="d-back" id="d-back-btn">← Back</button>
+  <div id="d-content"></div>
+</div>
+
+<script>
+  const API = "93ca3a41";
+  const sInput  = document.getElementById('s-input');
+  const sBtn    = document.getElementById('s-btn');
+  const sGrid   = document.getElementById('s-grid');
+  const sMeta   = document.getElementById('s-meta');
+  const sCount  = document.getElementById('s-count');
+  const sFilters= document.getElementById('s-filters');
+  const viewS   = document.getElementById('view-search');
+  const viewD   = document.getElementById('view-detail');
+  const dContent= document.getElementById('d-content');
+  const dBack   = document.getElementById('d-back-btn');
+
+  let allResults = [];
+  let activeType = 'all';
+
+  /* ── SEARCH ── */
+  function skeletons(n=10) {
+    sGrid.innerHTML = Array.from({length:n},(_,i)=>`
+      <div class="skel" style="animation-delay:${i*35}ms">
+        <div class="skel-poster"></div>
+        <div class="skel-line"></div>
+        <div class="skel-line short"></div>
+      </div>`).join('');
+  }
+
+  function renderGrid(items) {
+    if (!items.length) {
+      sGrid.innerHTML = `<div class="s-empty">
+        <div class="e-icon">🎭</div>
+        <h3>No results</h3>
+        <p>Try a different filter or search again.</p>
+      </div>`;
+      return;
+    }
+    sGrid.innerHTML = '';
+    items.forEach((item, i) => {
+      const {Title, Year, Poster, Type, imdbID} = item;
+      const hasPoster = Poster && Poster !== 'N/A';
+      const typeEmoji = {movie:'🎬', series:'📺', episode:'▶️', game:'🎮'}[Type] || '🎬';
+      const card = document.createElement('div');
+      card.className = 'm-card';
+      card.setAttribute('data-type', Type || 'movie');
+      card.setAttribute('role', 'listitem');
+      card.setAttribute('tabindex', '0');
+      card.style.animationDelay = `${i*40}ms`;
+      card.innerHTML = `
+        <div class="m-poster-wrap">
+          ${hasPoster
+            ? `<img class="m-poster" src="${Poster}" alt="${Title}" loading="lazy" />`
+            : `<div class="m-no-poster">${typeEmoji}</div>`}
+          <div class="m-overlay">
+            <div class="m-title">${Title}</div>
+            <div class="m-year">${Year || '—'}</div>
+          </div>
+          <span class="m-badge">${Type || 'movie'}</span>
+        </div>`;
+      card.addEventListener('click', () => openDetail(imdbID));
+      card.addEventListener('keydown', e => { if(e.key==='Enter') openDetail(imdbID); });
+      sGrid.appendChild(card);
+    });
+  }
+
+  sFilters.addEventListener('click', e => {
+    const pill = e.target.closest('.pill');
+    if (!pill) return;
+    activeType = pill.dataset.type;
+    sFilters.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p===pill));
+    const filtered = activeType==='all' ? allResults : allResults.filter(r=>r.Type===activeType);
+    renderGrid(filtered);
+  });
+
+  async function search() {
+    const q = sInput.value.trim();
+    if (!q) { sInput.style.borderColor='var(--red)'; setTimeout(()=>sInput.style.borderColor='',700); return; }
+    sBtn.textContent = '…';
+    sBtn.disabled = true;
+    sMeta.style.display = 'none';
+    skeletons();
+    try {
+      const res  = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(q)}&apikey=${API}`);
+      const data = await res.json();
+      if (data.Response==='False') {
+        allResults = [];
+        sGrid.innerHTML = `<div class="s-empty">
+          <div class="e-icon">🔍</div>
+          <h3>Nothing found for "${q}"</h3>
+          <p>Check the spelling or try another title.</p>
+        </div>`;
+      } else {
+        allResults = (data.Search||[]).filter(i=>i.Title&&i.imdbID);
+        activeType = 'all';
+        sFilters.querySelectorAll('.pill').forEach(p=>p.classList.toggle('active',p.dataset.type==='all'));
+        sCount.innerHTML = `<span>${allResults.length}</span> results for "${q}"`;
+        sMeta.style.display = 'flex';
+        renderGrid(allResults);
+      }
+    } catch(e) {
+      sGrid.innerHTML = `<div class="s-empty"><div class="e-icon">⚠️</div><h3>Network error</h3><p>Check your connection and try again.</p></div>`;
+    } finally {
+      sBtn.textContent = 'Search';
+      sBtn.disabled = false;
+    }
+  }
+
+  sBtn.addEventListener('click', search);
+  sInput.addEventListener('keydown', e => { if(e.key==='Enter') search(); });
+
+  /* ── DETAIL ── */
+  async function openDetail(id) {
+    viewS.style.display = 'none';
+    viewD.style.display = 'block';
+    window.scrollTo(0,0);
+    dContent.innerHTML = `<div class="d-loading"><div class="d-spinner"></div><p style="color:var(--muted);font-size:13px;">Loading…</p></div>`;
+
+    try {
+      const res  = await fetch(`https://www.omdbapi.com/?i=${id}&plot=full&apikey=${API}`);
+      const m    = await res.json();
+      if (m.Response==='False') throw new Error('Not found');
+
+      const hasPoster = m.Poster && m.Poster !== 'N/A';
+
+      // parse ratings
+      const imdbR   = m.imdbRating && m.imdbRating !== 'N/A' ? m.imdbRating : null;
+      const metaR   = m.Metascore  && m.Metascore  !== 'N/A' ? m.Metascore  : null;
+      const rtRating = (m.Ratings||[]).find(r=>r.Source.includes('Rotten'));
+      const rtR     = rtRating ? rtRating.Value : null;
+
+      // genres as tags
+      const genres = m.Genre ? m.Genre.split(',').map(g=>g.trim()).slice(0,3) : [];
+
+      dContent.innerHTML = `
+        <div class="d-backdrop">
+          ${hasPoster ? `<img class="d-backdrop-img" src="${m.Poster}" alt="" aria-hidden="true"/>` : ''}
+        </div>
+        <div class="d-body">
+          <div class="d-top">
+            <div class="d-poster">
+              ${hasPoster
+                ? `<img src="${m.Poster}" alt="${m.Title} poster" />`
+                : `<div class="d-poster-ph">🎬</div>`}
+            </div>
+            <div class="d-info">
+              ${genres.length ? `<div class="d-genre-row">${genres.map(g=>`<span class="d-genre-tag">${g}</span>`).join('')}</div>` : ''}
+              <h1 class="d-title-main">${m.Title}</h1>
+              <div class="d-year-runtime">
+                <span>${m.Year || '—'}</span>
+                ${m.Runtime && m.Runtime!=='N/A' ? ` &nbsp;·&nbsp; ${m.Runtime}` : ''}
+                ${m.Rated   && m.Rated!=='N/A'   ? ` &nbsp;·&nbsp; ${m.Rated}`   : ''}
+              </div>
+
+              ${(imdbR||metaR||rtR) ? `
+              <div class="d-ratings">
+                ${imdbR ? `<div class="d-rating"><div class="r-val">⭐ ${imdbR}</div><div class="r-src">IMDb</div></div>` : ''}
+                ${metaR ? `<div class="d-rating"><div class="r-val" style="color:#6cc">${metaR}</div><div class="r-src">Metascore</div></div>` : ''}
+                ${rtR   ? `<div class="d-rating"><div class="r-val" style="color:#f97316">${rtR}</div><div class="r-src">Rotten T.</div></div>` : ''}
+              </div>` : ''}
+            </div>
+          </div>
+
+          ${m.Plot && m.Plot!=='N/A' ? `
+          <div class="d-section">
+            <div class="d-section-label">Plot</div>
+            <p class="d-plot">${m.Plot}</p>
+          </div>` : ''}
+
+          <div class="d-section">
+            <div class="d-section-label">Details</div>
+            <div class="d-meta-grid">
+              ${m.Director && m.Director!=='N/A' ? `<div class="d-meta-item"><div class="d-meta-label">Director</div><div class="d-meta-val">${m.Director}</div></div>` : ''}
+              ${m.Actors   && m.Actors!=='N/A'   ? `<div class="d-meta-item"><div class="d-meta-label">Cast</div><div class="d-meta-val">${m.Actors}</div></div>` : ''}
+              ${m.Language && m.Language!=='N/A' ? `<div class="d-meta-item"><div class="d-meta-label">Language</div><div class="d-meta-val">${m.Language}</div></div>` : ''}
+              ${m.Country  && m.Country!=='N/A'  ? `<div class="d-meta-item"><div class="d-meta-label">Country</div><div class="d-meta-val">${m.Country}</div></div>` : ''}
+              ${m.BoxOffice&& m.BoxOffice!=='N/A'? `<div class="d-meta-item"><div class="d-meta-label">Box Office</div><div class="d-meta-val">${m.BoxOffice}</div></div>` : ''}
+              ${m.Awards   && m.Awards!=='N/A'   ? `<div class="d-meta-item" style="grid-column:1/-1"><div class="d-meta-label">Awards</div><div class="d-meta-val">${m.Awards}</div></div>` : ''}
+            </div>
+          </div>
+
+          <a class="d-imdb-btn" href="https://www.imdb.com/title/${m.imdbID}" target="_blank" rel="noopener">
+            ⭐ View on IMDb
+          </a>
+        </div>`;
+    } catch(e) {
+      dContent.innerHTML = `<div class="d-loading"><p style="color:var(--muted)">Could not load movie details.</p></div>`;
+    }
+  }
+
+  dBack.addEventListener('click', () => {
+    viewD.style.display = 'none';
+    viewS.style.display = 'block';
+    window.scrollTo(0,0);
+  });
+</script>
+</body>
+</html>
