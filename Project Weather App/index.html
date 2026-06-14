@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-from: #0B1120;
+      --bg-to: #1E293B;
+      --accent: #6366F1;
+      --accent-soft: rgba(99,102,241,0.12);
+      --text-primary: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --text-tertiary: #94A3B8;
+      --card-bg: rgba(255,255,255,0.04);
+      --card-border: rgba(255,255,255,0.08);
+      --pill-bg: rgba(255,255,255,0.06);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--bg-from) 0%, var(--bg-to) 100%);
+      transition: background 2s ease;
+      padding: 20px;
+    }
+
+    /* ── TIME-BASED THEMES ── */
+    body.theme-night   { --bg-from:#040C1A; --bg-to:#0F172A; --accent:#818CF8; --accent-soft:rgba(129,140,248,0.12); }
+    body.theme-dawn    { --bg-from:#1A0A2E; --bg-to:#2D1B69; --accent:#A78BFA; --accent-soft:rgba(167,139,250,0.12); }
+    body.theme-morning { --bg-from:#0C2340; --bg-to:#1E3A5F; --accent:#38BDF8; --accent-soft:rgba(56,189,248,0.12); }
+    body.theme-midday  { --bg-from:#0E3B66; --bg-to:#1A5276; --accent:#F59E0B; --accent-soft:rgba(245,158,11,0.12); }
+    body.theme-afternoon { --bg-from:#0D2B4E; --bg-to:#1C3D6B; --accent:#FB923C; --accent-soft:rgba(251,146,60,0.12); }
+    body.theme-evening { --bg-from:#1A0A2E; --bg-to:#3B1A5F; --accent:#C084FC; --accent-soft:rgba(192,132,252,0.12); }
+
+    .card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      padding: 36px 32px 28px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      transition: background 2s ease, border-color 2s ease;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+
+    /* .location-block {} */
+    .city-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: 0.02em;
+    }
+    .date-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+      font-weight: 400;
+    }
+
+    .clock {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 6px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+      font-variant-numeric: tabular-nums;
+      transition: background 2s ease, color 2s ease;
+    }
+
+    /* ── WEATHER ICON + CONDITION ── */
+    .weather-hero {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .weather-icon-wrap {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 12px;
+      background: var(--accent-soft);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 2s ease;
+    }
+
+    .weather-icon-wrap svg,
+    .weather-icon-wrap img {
+      width: 52px;
+      height: 52px;
+    }
+
+    .condition-text {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      transition: color 2s ease;
+    }
+
+    /* ── BIG TEMP ── */
+    .temp-display {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .temp-value {
+      font-size: 88px;
+      font-weight: 300;
+      color: var(--text-primary);
+      line-height: 1;
+      letter-spacing: -4px;
+    }
+
+    .temp-unit {
+      font-size: 32px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      vertical-align: top;
+      margin-top: 14px;
+      display: inline-block;
+      letter-spacing: 0;
+    }
+
+    .feels-like {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+      font-weight: 400;
+    }
+
+    /* ── STAT PILLS ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .stat-pill {
+      background: var(--pill-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 14px 10px;
+      text-align: center;
+    }
+
+    .stat-icon {
+      font-size: 18px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .stat-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 2px;
+      display: block;
+    }
+
+    /* ── MIN / MAX BAR ── */
+    .minmax-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--pill-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+    }
+
+    .minmax-item {
+      text-align: center;
+    }
+
+    .minmax-label {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 500;
+    }
+
+    .minmax-val {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-top: 2px;
+    }
+
+    .minmax-divider {
+      width: 1px;
+      height: 36px;
+      background: var(--card-border);
+    }
+
+    /* ── SUN TIMES ── */
+    .sun-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .sun-card {
+      background: var(--pill-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sun-emoji {
+      font-size: 22px;
+    }
+
+    /* .sun-info {} */
+    .sun-label {
+      font-size: 10px;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 500;
+    }
+    .sun-time {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── LOADING / ERROR ── */
+    .state-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      background: linear-gradient(135deg, #040C1A 0%, #0F172A 100%);
+      z-index: 100;
+      transition: opacity 0.6s ease;
+    }
+
+    .state-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loader-ring {
+      width: 44px;
+      height: 44px;
+      border: 3px solid rgba(255,255,255,0.08);
+      border-top-color: #818CF8;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    .loader-text {
+      font-size: 13px;
+      color: #64748B;
+      font-weight: 500;
+    }
+
+    .error-icon { font-size: 36px; }
+
+    .retry-btn {
+      margin-top: 6px;
+      background: rgba(129,140,248,0.15);
+      border: 1px solid rgba(129,140,248,0.3);
+      color: #818CF8;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 10px 22px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .retry-btn:hover { background: rgba(129,140,248,0.25); }
+
+    /* ── API KEY NOTICE ── */
+    .api-notice {
+      margin-top: 20px;
+      padding: 12px 16px;
+      background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 12px;
+      font-size: 12px;
+      color: #FCD34D;
+      line-height: 1.5;
+      text-align: center;
+      display: none;
+    }
+
+    .api-notice a {
+      color: #F59E0B;
+      text-decoration: underline;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 420px) {
+      .card { padding: 28px 22px 22px; }
+      .temp-value { font-size: 72px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading / Error overlay -->
+  <div class="state-overlay" id="overlay">
+    <div class="loader-ring" id="loaderRing"></div>
+    <p class="loader-text" id="loaderText">Getting your location…</p>
+    <div class="error-icon" id="errorIcon" style="display:none">⚠️</div>
+    <button class="retry-btn" id="retryBtn" style="display:none" onclick="init()">Try again</button>
+  </div>
+
+  <!-- Main card -->
+  <div class="card" id="card" style="opacity:0; transition: opacity 0.6s ease;">
+    <div class="header">
+      <div class="location-block">
+        <div class="city-name" id="cityName">—</div>
+        <div class="date-label" id="dateLabel">—</div>
+      </div>
+      <div class="clock" id="clock">—</div>
+    </div>
+
+    <div class="weather-hero">
+      <div class="weather-icon-wrap" id="iconWrap">
+        <span style="font-size:48px" id="weatherEmoji">🌡️</span>
+      </div>
+      <div class="condition-text" id="conditionText">—</div>
+    </div>
+
+    <div class="temp-display">
+      <span class="temp-value" id="tempVal">—</span><span class="temp-unit">°C</span>
+      <div class="feels-like" id="feelsLike"></div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-pill">
+        <span class="stat-icon">💧</span>
+        <span class="stat-value" id="humidVal">—</span>
+        <span class="stat-label">Humidity</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-icon">💨</span>
+        <span class="stat-value" id="windVal">—</span>
+        <span class="stat-label">Wind</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-icon">☁️</span>
+        <span class="stat-value" id="cloudsVal">—</span>
+        <span class="stat-label">Clouds</span>
+      </div>
+    </div>
+
+    <div class="minmax-row">
+      <div class="minmax-item">
+        <div class="minmax-label">Min</div>
+        <div class="minmax-val" id="minVal">—</div>
+      </div>
+      <div class="minmax-divider"></div>
+      <div class="minmax-item" style="text-align:center">
+        <div class="minmax-label">Feels like</div>
+        <div class="minmax-val" id="feelsVal">—</div>
+      </div>
+      <div class="minmax-divider"></div>
+      <div class="minmax-item">
+        <div class="minmax-label">Max</div>
+        <div class="minmax-val" id="maxVal">—</div>
+      </div>
+    </div>
+
+    <div class="sun-row">
+      <div class="sun-card">
+        <span class="sun-emoji">🌅</span>
+        <div class="sun-info">
+          <div class="sun-label">Sunrise</div>
+          <div class="sun-time" id="sunriseVal">—</div>
+        </div>
+      </div>
+      <div class="sun-card">
+        <span class="sun-emoji">🌇</span>
+        <div class="sun-info">
+          <div class="sun-label">Sunset</div>
+          <div class="sun-time" id="sunsetVal">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="api-notice" id="apiNotice">
+      🔑 Replace <code>YOUR_API_KEY</code> in the script with your free key from
+      <a href="https://openweathermap.org/api" target="_blank">openweathermap.org</a>
+    </div>
+  </div>
+
+  <script>
+    // ─────────────────────────────────────────────
+    //  CONFIG — paste your OpenWeatherMap key here
+    // ─────────────────────────────────────────────
+    const API_KEY       = '5b9e4f7d576c7572cc50f27b004ad64e';
+    const BASE          = 'https://api.openweathermap.org/data/2.5/weather';
+    const BASE_FORECAST = 'https://api.openweathermap.org/data/2.5/forecast';
+
+    // ── DOM refs ──
+    const overlay      = document.getElementById('overlay');
+    const loaderRing   = document.getElementById('loaderRing');
+    const loaderText   = document.getElementById('loaderText');
+    const errorIcon    = document.getElementById('errorIcon');
+    const retryBtn     = document.getElementById('retryBtn');
+    const card         = document.getElementById('card');
+
+    const clockEl      = document.getElementById('clock');
+    const cityEl       = document.getElementById('cityName');
+    const dateEl       = document.getElementById('dateLabel');
+    const tempEl       = document.getElementById('tempVal');
+    const feelsEl      = document.getElementById('feelsVal');
+    const feelsLikeEl  = document.getElementById('feelsLike');
+    const condEl       = document.getElementById('conditionText');
+    const emojiEl      = document.getElementById('weatherEmoji');
+    const humidEl      = document.getElementById('humidVal');
+    const windEl       = document.getElementById('windVal');
+    const cloudsEl     = document.getElementById('cloudsVal');
+    const minEl        = document.getElementById('minVal');
+    const maxEl        = document.getElementById('maxVal');
+    const sunriseEl    = document.getElementById('sunriseVal');
+    const sunsetEl     = document.getElementById('sunsetVal');
+    const apiNotice    = document.getElementById('apiNotice');
+
+    // ── Clock & theme ──
+    const THEMES = [
+      { from: 0,  to: 5,  cls: 'theme-night'     },
+      { from: 5,  to: 7,  cls: 'theme-dawn'       },
+      { from: 7,  to: 11, cls: 'theme-morning'    },
+      { from: 11, to: 15, cls: 'theme-midday'     },
+      { from: 15, to: 18, cls: 'theme-afternoon'  },
+      { from: 18, to: 21, cls: 'theme-evening'    },
+      { from: 21, to: 24, cls: 'theme-night'      },
+    ];
+
+    function applyTheme(h) {
+      const allCls = THEMES.map(t => t.cls);
+      document.body.classList.remove(...allCls);
+      const match = THEMES.find(t => h >= t.from && h < t.to);
+      if (match) document.body.classList.add(match.cls);
+    }
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function tickClock() {
+      const d = new Date();
+      const h = d.getHours(), m = d.getMinutes(), s = d.getSeconds();
+      clockEl.textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
+      applyTheme(h);
+
+      // Date label
+      const opts = { weekday: 'short', day: 'numeric', month: 'short' };
+      dateEl.textContent = d.toLocaleDateString('en-IN', opts);
+    }
+    tickClock();
+    setInterval(tickClock, 1000);
+
+    // ── Condition → emoji ──
+    const CONDITION_MAP = [
+      { ids: [800],             emoji: '☀️',  label: 'Clear sky'       },
+      { ids: [801],             emoji: '🌤️', label: 'Few clouds'      },
+      { ids: [802],             emoji: '⛅',  label: 'Partly cloudy'   },
+      { ids: [803, 804],        emoji: '☁️',  label: 'Overcast'        },
+      { ids: [300,301,302,310,311,312,313,314,321], emoji: '🌦️', label: 'Drizzle' },
+      { ids: [500,501],         emoji: '🌧️', label: 'Rain'            },
+      { ids: [502,503,504],     emoji: '⛈️', label: 'Heavy rain'      },
+      { ids: [511],             emoji: '🌨️', label: 'Freezing rain'   },
+      { ids: [520,521,522,531], emoji: '🌧️', label: 'Shower rain'     },
+      { ids: [200,201,202,210,211,212,221,230,231,232], emoji: '⛈️', label: 'Thunderstorm' },
+      { ids: [600,601,602,611,612,613,615,616,620,621,622], emoji: '❄️', label: 'Snow' },
+      { ids: [701,711,721,731,741,751,761,762,771,781], emoji: '🌫️', label: 'Fog / Haze' },
+    ];
+
+    function getConditionInfo(id) {
+      const match = CONDITION_MAP.find(c => c.ids.includes(id));
+      return match || { emoji: '🌡️', label: 'Unknown' };
+    }
+
+    function fmtTime(unixSec, tzOffsetSec) {
+      const ms = (unixSec + tzOffsetSec) * 1000;
+      const d  = new Date(ms);
+      const h  = d.getUTCHours(), m = d.getUTCMinutes();
+      const suffix = h >= 12 ? 'PM' : 'AM';
+      return `${pad(h % 12 || 12)}:${pad(m)} ${suffix}`;
+    }
+
+    // ── Show error ──
+    function showError(msg) {
+      loaderRing.style.display = 'none';
+      loaderText.textContent = msg;
+      loaderText.style.color = '#F87171';
+      errorIcon.style.display = 'block';
+      retryBtn.style.display = 'block';
+    }
+
+    // ── Get true daily min/max from forecast endpoint ──
+    // The /weather endpoint gives instantaneous temp_min/max which are often
+    // identical in urban areas. /forecast gives 3-hour intervals for 5 days —
+    // we filter today's entries and derive the real high/low.
+    function getDailyMinMax(forecastData, tzOffsetSec) {
+      const nowUTC   = Math.floor(Date.now() / 1000);
+      // Today's date string in the location's local time
+      const localNow = new Date((nowUTC + tzOffsetSec) * 1000);
+      const todayStr = localNow.toISOString().slice(0, 10); // "YYYY-MM-DD"
+
+      const todayTemps = forecastData.list
+        .filter(entry => {
+          const localEntry = new Date((entry.dt + tzOffsetSec) * 1000);
+          return localEntry.toISOString().slice(0, 10) === todayStr;
+        })
+        .map(entry => entry.main.temp);
+
+      if (todayTemps.length === 0) return null;
+      return {
+        min: Math.round(Math.min(...todayTemps)),
+        max: Math.round(Math.max(...todayTemps)),
+      };
+    }
+
+    // ── Populate card ──
+    function populate(data, minMax) {
+      const cond = getConditionInfo(data.weather[0].id);
+      const tz   = data.timezone;
+
+      cityEl.textContent      = `${data.name}, ${data.sys.country}`;
+      tempEl.textContent      = Math.round(data.main.temp);
+      feelsEl.textContent     = Math.round(data.main.feels_like) + '°';
+      feelsLikeEl.textContent = `feels like ${Math.round(data.main.feels_like)}°C`;
+      condEl.textContent      = cond.label;
+      emojiEl.textContent     = cond.emoji;
+      humidEl.textContent     = data.main.humidity + '%';
+      windEl.textContent      = Math.round(data.wind.speed * 3.6) + ' km/h';
+      cloudsEl.textContent    = data.clouds.all + '%';
+      // Use true daily min/max from forecast if available, else fall back
+      minEl.textContent       = (minMax ? minMax.min : Math.round(data.main.temp_min)) + '°';
+      maxEl.textContent       = (minMax ? minMax.max : Math.round(data.main.temp_max)) + '°';
+      sunriseEl.textContent   = fmtTime(data.sys.sunrise, tz);
+      sunsetEl.textContent    = fmtTime(data.sys.sunset,  tz);
+    }
+
+    // ── Fetch weather (current + forecast in parallel) ──
+    async function fetchWeather(lat, lon) {
+      loaderText.textContent = 'Fetching weather…';
+
+      if (API_KEY === 'YOUR_API_KEY') {
+        overlay.classList.add('hidden');
+        card.style.opacity = '1';
+        apiNotice.style.display = 'block';
+
+        cityEl.textContent      = 'New Delhi, IN';
+        tempEl.textContent      = '34';
+        feelsEl.textContent     = '38°';
+        feelsLikeEl.textContent = 'feels like 38°C';
+        condEl.textContent      = 'Clear sky';
+        emojiEl.textContent     = '☀️';
+        humidEl.textContent     = '42%';
+        windEl.textContent      = '14 km/h';
+        cloudsEl.textContent    = '8%';
+        minEl.textContent       = '28°';
+        maxEl.textContent       = '41°';
+        sunriseEl.textContent   = '05:26 AM';
+        sunsetEl.textContent    = '07:14 PM';
+        return;
+      }
+
+      const params = `lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
+
+      // Fire both requests at the same time
+      const [currentRes, forecastRes] = await Promise.all([
+        fetch(`${BASE}?${params}`),
+        fetch(`${BASE_FORECAST}?${params}&cnt=8`), // cnt=8 → next 24 hrs (3hr × 8)
+      ]);
+
+      if (!currentRes.ok) {
+        if (currentRes.status === 401) throw new Error('Invalid API key — check your OpenWeatherMap key.');
+        throw new Error(`Weather API error: ${currentRes.status}`);
+      }
+
+      const data = await currentRes.json();
+
+      // Derive true daily min/max from forecast (gracefully ignore if it fails)
+      let minMax = null;
+      if (forecastRes.ok) {
+        try {
+          const forecastData = await forecastRes.json();
+          minMax = getDailyMinMax(forecastData, data.timezone);
+        } catch (_) { /* fall back to current endpoint values */ }
+      }
+
+      populate(data, minMax);
+      overlay.classList.add('hidden');
+      card.style.opacity = '1';
+    }
+
+    // ── Geolocation ──
+    function init() {
+      errorIcon.style.display = 'none';
+      retryBtn.style.display  = 'none';
+      loaderRing.style.display = 'block';
+      loaderText.style.color  = '';
+      loaderText.textContent  = 'Getting your location…';
+      overlay.classList.remove('hidden');
+      card.style.opacity = '0';
+
+      if (!navigator.geolocation) {
+        showError('Geolocation not supported by your browser.');
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            await fetchWeather(pos.coords.latitude, pos.coords.longitude);
+          } catch (err) {
+            showError(err.message || 'Something went wrong.');
+          }
+        },
+        (err) => {
+          const msgs = {
+            1: 'Location permission denied. Please allow access.',
+            2: 'Location unavailable. Check your connection.',
+            3: 'Location request timed out.',
+          };
+          showError(msgs[err.code] || 'Could not get location.');
+        },
+        { timeout: 10000 }
+      );
+    }
+
+    init();
+  </script>
+</body>
+</html>
