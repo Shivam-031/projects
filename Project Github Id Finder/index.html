@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GitHub Profile Finder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* GitHub dark palette */
+      --bg:          #0d1117;
+      --surface:     #161b22;
+      --surface-2:   #1c2128;
+      --border:      #30363d;
+      --border-muted:#21262d;
+      --ink:         #e6edf3;
+      --ink-muted:   #8b949e;
+      --ink-subtle:  #6e7681;
+      --green:       #238636;
+      --green-light: #2ea043;
+      --green-dim:   rgba(35,134,54,.15);
+      --blue:        #58a6ff;
+      --blue-dim:    rgba(88,166,255,.1);
+      --orange:      #d29922;
+      --red:         #f85149;
+      --purple:      #bc8cff;
+      /* glass on top of --surface */
+      --glass-bg:    rgba(22,27,34,0.75);
+      --glass-border:rgba(48,54,61,0.8);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,17,23,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 32px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    header svg { fill: var(--ink); flex-shrink: 0; }
+    .header-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px; font-weight: 600;
+      color: var(--ink); letter-spacing: -0.01em;
+    }
+    .header-badge {
+      margin-left: auto;
+      font-size: 11px; font-weight: 500;
+      color: var(--green-light);
+      background: var(--green-dim);
+      border: 1px solid rgba(35,134,54,.4);
+      border-radius: 20px; padding: 2px 10px;
+    }
+
+    /* ── SEARCH ── */
+    .search-wrap {
+      display: flex; justify-content: center;
+      padding: 56px 20px 40px;
+    }
+    .search-box {
+      width: 100%; max-width: 560px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 32px 36px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.04);
+    }
+    .search-box h1 {
+      font-size: 20px; font-weight: 700;
+      color: var(--ink); margin-bottom: 6px;
+    }
+    .search-box p {
+      font-size: 13px; color: var(--ink-muted); margin-bottom: 20px;
+    }
+    .search-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .search-row input {
+      flex: 1; min-width: 0; padding: 9px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px; color: var(--ink);
+      outline: none; transition: border-color .15s, box-shadow .15s;
+    }
+    .search-row input::placeholder { color: var(--ink-subtle); }
+    .search-row input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(88,166,255,.15);
+    }
+    .search-row button {
+      padding: 9px 20px;
+      background: var(--green);
+      color: #fff;
+      border: 1px solid rgba(240,246,252,.1);
+      border-radius: 6px;
+      font-size: 14px; font-weight: 500;
+      cursor: pointer; white-space: nowrap;
+      transition: background .12s, transform .1s;
+      box-shadow: 0 1px 0 rgba(27,31,36,.1), inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    .search-row button:hover { background: var(--green-light); }
+    .search-row button:active { transform: scale(.97); }
+    @media (max-width: 480px) {
+      .search-wrap { padding: 32px 14px 24px; }
+      .search-box { padding: 24px 18px; }
+      .search-row { flex-direction: column; }
+      .search-row input, .search-row button { width: 100%; }
+      .spinner { display: none !important; }
+    }
+    #errorMsg { margin-top: 10px; font-size: 13px; color: var(--red); min-height: 18px; }
+
+    /* ── SPINNER ── */
+    .spinner {
+      display: none; width: 18px; height: 18px;
+      border: 2px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── MAIN LAYOUT ── */
+    #mainContent {
+      display: none; max-width: 1140px;
+      margin: 0 auto; padding: 0 24px 80px; gap: 24px;
+    }
+    #mainContent.visible { display: grid; grid-template-columns: 260px 1fr; }
+    @media (max-width: 760px) { #mainContent.visible { grid-template-columns: 1fr; } }
+
+    /* ── SIDEBAR ── */
+    .profile-card { position: sticky; top: 60px; align-self: start; display: flex; flex-direction: column; gap: 16px; }
+
+    .avatar-wrap {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 24px 20px 20px;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.04);
+    }
+    .avatar-wrap img {
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      margin-bottom: 14px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.4);
+    }
+    .profile-name { font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+    .profile-login { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink-muted); margin-bottom: 12px; }
+    .profile-bio { font-size: 13px; color: var(--ink-muted); line-height: 1.5; margin-bottom: 16px; }
+
+    .stat-row {
+      display: flex; border-top: 1px solid var(--border-muted);
+      padding-top: 14px; gap: 0;
+    }
+    .stat-item { flex: 1; text-align: center; }
+    .stat-item + .stat-item { border-left: 1px solid var(--border-muted); }
+    .stat-item .num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px; font-weight: 700;
+    }
+    .stat-item:nth-child(1) .num { color: var(--blue); }
+    .stat-item:nth-child(2) .num { color: var(--purple); }
+    .stat-item:nth-child(3) .num { color: var(--green-light); }
+    .stat-item .lbl { font-size: 10px; color: var(--ink-subtle); margin-top: 2px; text-transform: uppercase; letter-spacing: .06em; }
+
+    /* PROFILE VIEW BUTTON */
+    .view-profile-btn {
+      display: block; margin-top: 14px; padding: 7px 14px; width: 100%;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--ink); font-size: 13px; font-weight: 500;
+      text-decoration: none; text-align: center;
+      transition: background .12s, border-color .12s;
+    }
+    .view-profile-btn:hover { background: var(--surface-2); border-color: var(--blue); color: var(--blue); }
+
+    /* SOCIAL */
+    .social-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px; padding: 16px 18px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .social-card h3 { font-size: 11px; font-weight: 600; color: var(--ink-subtle); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 12px; }
+    .social-link {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--ink-muted);
+      text-decoration: none; padding: 5px 0;
+      border-bottom: 1px solid var(--border-muted);
+      transition: color .12s;
+    }
+    .social-link:last-child { border-bottom: none; }
+    .social-link:hover { color: var(--blue); }
+    .social-link svg { color: var(--ink-subtle); flex-shrink: 0; }
+    .social-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* ── RIGHT COL ── */
+    .right-col { display: flex; flex-direction: column; gap: 20px; }
+
+    /* SECTION CARD */
+    .section-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px; overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.03);
+    }
+    .section-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-muted);
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(22,27,34,0.5);
+    }
+    .section-header h2 { font-size: 14px; font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 8px; }
+    .section-header h2 .icon { color: var(--ink-muted); }
+    .section-header a { font-size: 12px; color: var(--blue); text-decoration: none; font-weight: 500; }
+    .section-header a:hover { text-decoration: underline; }
+    .section-header span { font-size: 12px; color: var(--ink-muted); }
+
+    /* ACTIVITY */
+    .activity-summary { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; padding: 16px 20px 8px; }
+    .act-stat {
+      background: var(--surface);
+      border: 1px solid var(--border-muted);
+      border-radius: 8px; padding: 14px 10px; text-align: center;
+    }
+    .act-stat .num { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; }
+    .act-stat:nth-child(1) .num { color: var(--blue); }
+    .act-stat:nth-child(2) .num { color: var(--purple); }
+    .act-stat:nth-child(3) .num { color: var(--green-light); }
+    .act-stat .lbl { font-size: 10px; color: var(--ink-subtle); margin-top: 3px; text-transform: uppercase; letter-spacing: .06em; }
+
+    .activity-grid { padding: 14px 20px 18px; display: flex; flex-direction: column; gap: 7px; }
+    .activity-bar-row { display: flex; align-items: center; gap: 10px; }
+    .activity-label { font-size: 11px; color: var(--ink-subtle); width: 28px; text-align: right; font-family: 'JetBrains Mono', monospace; }
+    .activity-bar-bg { flex: 1; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; border: 1px solid var(--border-muted); }
+    .activity-bar-fill { height: 100%; background: var(--green-light); border-radius: 4px; transition: width .5s ease; }
+    .activity-count { font-size: 11px; color: var(--ink-subtle); font-family: 'JetBrains Mono', monospace; width: 24px; }
+
+    /* REPOS */
+    .repo-grid { display: flex; flex-direction: column; }
+    .repo-item {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-muted);
+      display: flex; flex-direction: column; gap: 6px;
+      transition: background .1s;
+    }
+    .repo-item:last-child { border-bottom: none; }
+    .repo-item:hover { background: rgba(255,255,255,.02); }
+    .repo-item-top { display: flex; align-items: center; gap: 8px; }
+    .repo-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; font-weight: 600;
+      color: var(--blue); text-decoration: none;
+    }
+    .repo-name:hover { text-decoration: underline; }
+    .repo-fork-badge {
+      font-size: 10px;
+      border: 1px solid var(--border);
+      border-radius: 20px; padding: 1px 8px;
+      color: var(--ink-muted);
+    }
+    .repo-desc { font-size: 12px; color: var(--ink-muted); line-height: 1.45; }
+    .repo-meta { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 2px; }
+    .meta-item { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ink-muted); }
+    .lang-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+    /* LANGUAGE TOPIC PILL */
+    .lang-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--blue-dim);
+      color: var(--blue);
+      border-radius: 20px; padding: 2px 10px;
+      font-size: 11px; font-weight: 500;
+    }
+
+    /* EMPTY STATE */
+    .empty { padding: 28px 20px; text-align: center; color: var(--ink-muted); font-size: 13px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <svg width="22" height="22" viewBox="0 0 16 16" aria-hidden="true">
+    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+             0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+             -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66
+             .07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15
+             -.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27
+             .68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12
+             .51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48
+             0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+  </svg>
+  <span class="header-title">github profile finder</span>
+  <span class="header-badge">GitHub API</span>
+</header>
+
+<!-- SEARCH -->
+<div class="search-wrap">
+  <div class="search-box">
+    <h1>Find a GitHub Profile</h1>
+    <p>Search any public GitHub user to explore their repos, activity, and more.</p>
+    <div class="search-row">
+      <input type="text" id="githubInput" placeholder="Enter a username…" autocomplete="off" spellcheck="false" />
+      <div class="spinner" id="spinner"></div>
+      <button id="searchBtn" onclick="doSearch()">Search</button>
+    </div>
+    <div id="errorMsg"></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="mainContent">
+
+  <!-- SIDEBAR -->
+  <aside class="profile-card">
+    <div class="avatar-wrap">
+      <img id="avatar" src="" alt="Avatar" />
+      <div class="profile-name" id="profileName"></div>
+      <div class="profile-login" id="profileLogin"></div>
+      <div class="profile-bio" id="profileBio"></div>
+      <div class="stat-row">
+        <div class="stat-item"><div class="num" id="statFollowers"></div><div class="lbl">Followers</div></div>
+        <div class="stat-item"><div class="num" id="statFollowing"></div><div class="lbl">Following</div></div>
+        <div class="stat-item"><div class="num" id="statRepos"></div><div class="lbl">Repos</div></div>
+      </div>
+      <a class="view-profile-btn" id="profileLink" href="" target="_blank">View on GitHub ↗</a>
+    </div>
+    <div class="social-card" id="socialCard"></div>
+  </aside>
+
+  <!-- RIGHT -->
+  <div class="right-col">
+
+    <!-- ACTIVITY -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2>
+          <span class="icon">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M11.93 8.5a4.002 4.002 0 01-7.86 0H.75a.75.75 0 010-1.5h3.32a4.002 4.002 0 017.86 0h3.32a.75.75 0 010 1.5h-3.32z"/></svg>
+          </span>
+          Contribution Activity
+        </h2>
+        <span id="activityPeriod"></span>
+      </div>
+      <div class="activity-summary" id="activitySummary"></div>
+      <div class="activity-grid" id="activityGrid"></div>
+    </div>
+
+    <!-- TOP REPOS -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2>
+          <span class="icon">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"/></svg>
+          </span>
+          Top Repositories
+        </h2>
+        <a id="allReposLink" href="" target="_blank">View all →</a>
+      </div>
+      <div class="repo-grid" id="topRepos"></div>
+    </div>
+
+    <!-- ALL REPOS -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2>
+          <span class="icon">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 010-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8zM5 12.25v3.25a.25.25 0 00.4.2l1.45-1.087a.25.25 0 01.3 0L8.6 15.7a.25.25 0 00.4-.2v-3.25a.25.25 0 00-.25-.25h-3.5a.25.25 0 00-.25.25z"/></svg>
+          </span>
+          All Repositories
+        </h2>
+        <span id="repoCount"></span>
+      </div>
+      <div class="repo-grid" id="allRepos"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  const LANG_COLORS = {
+    JavaScript:'#f1e05a', TypeScript:'#3178c6', Python:'#3572A5',
+    HTML:'#e34c26', CSS:'#563d7c', Java:'#b07219', Go:'#00ADD8',
+    Rust:'#dea584', C:'#555555', 'C++':'#f34b7d', Ruby:'#701516',
+    Shell:'#89e051', Kotlin:'#A97BFF', Swift:'#F05138', Dart:'#00B4AB',
+    'Jupyter Notebook':'#DA5B0B', R:'#198CE7', Scala:'#c22d40'
+  };
+
+  function fmtNum(n) { return n >= 1000 ? (n/1000).toFixed(1)+'k' : n; }
+
+  function starIcon() {
+    return `<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"/></svg>`;
+  }
+  function forkIcon() {
+    return `<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878zm3.75 7.378a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm3-8.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/></svg>`;
+  }
+
+  function repoCard(repo) {
+    const lc = LANG_COLORS[repo.language] || '#8b949e';
+    const lang = repo.language
+      ? `<span class="meta-item"><span class="lang-dot" style="background:${lc}"></span>${repo.language}</span>` : '';
+    const stars = `<span class="meta-item">${starIcon()} ${fmtNum(repo.stargazers_count)}</span>`;
+    const forks = repo.forks_count > 0 ? `<span class="meta-item">${forkIcon()} ${fmtNum(repo.forks_count)}</span>` : '';
+    const updated = repo.pushed_at
+      ? `<span class="meta-item">Updated ${timeAgo(new Date(repo.pushed_at))}</span>` : '';
+    const forkBadge = repo.fork ? '<span class="repo-fork-badge">Fork</span>' : '';
+    const archBadge = repo.archived ? '<span class="repo-fork-badge" style="color:#d29922;border-color:#d29922">Archived</span>' : '';
+    return `<div class="repo-item">
+      <div class="repo-item-top">
+        <a class="repo-name" href="${repo.html_url}" target="_blank">${repo.name}</a>
+        ${forkBadge}${archBadge}
+      </div>
+      ${repo.description ? `<div class="repo-desc">${repo.description}</div>` : ''}
+      <div class="repo-meta">${lang}${stars}${forks}${updated}</div>
+    </div>`;
+  }
+
+  function timeAgo(date) {
+    const s = Math.floor((Date.now() - date) / 1000);
+    if (s < 60) return 'just now';
+    const m = Math.floor(s/60); if (m < 60) return m+'m ago';
+    const h = Math.floor(m/60); if (h < 24) return h+'h ago';
+    const d = Math.floor(h/24); if (d < 30) return d+'d ago';
+    const mo = Math.floor(d/30); if (mo < 12) return mo+' mo ago';
+    return Math.floor(mo/12)+'y ago';
+  }
+
+  const linkIcon    = () => `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"/></svg>`;
+  const twitterIcon = () => `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M5.026 15c6.038 0 9.341-5.003 9.341-9.334 0-.14 0-.282-.006-.422A6.685 6.685 0 0016 3.542a6.658 6.658 0 01-1.889.518 3.301 3.301 0 001.447-1.817 6.533 6.533 0 01-2.087.793A3.286 3.286 0 007.875 6.03a9.325 9.325 0 01-6.767-3.429 3.289 3.289 0 001.018 4.382A3.323 3.323 0 01.64 6.575v.045a3.288 3.288 0 002.632 3.218 3.203 3.203 0 01-.865.115 3.23 3.23 0 01-.614-.057 3.283 3.283 0 003.067 2.277A6.588 6.588 0 010 13.599a9.29 9.29 0 005.032 1.475"/></svg>`;
+  const orgIcon     = () => `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 14.25c0 .138.112.25.25.25H4v-1.25a.75.75 0 01.75-.75h2.5a.75.75 0 01.75.75v1.25h2.25a.25.25 0 00.25-.25V1.75a.25.25 0 00-.25-.25h-8.5a.25.25 0 00-.25.25v12.5zM1.75 0h8.5C11.216 0 12 .784 12 1.75v12.5A1.75 1.75 0 0110.25 16h-8.5A1.75 1.75 0 010 14.25V1.75C0 .784.784 0 1.75 0zM3.75 6a.75.75 0 000 1.5h.5a.75.75 0 000-1.5h-.5zm0-2.5a.75.75 0 000 1.5h.5a.75.75 0 000-1.5h-.5zm4 2.5a.75.75 0 000 1.5h.5a.75.75 0 000-1.5h-.5zm0-2.5a.75.75 0 000 1.5h.5a.75.75 0 000-1.5h-.5zM5.25 10a.75.75 0 00-.75.75V16h3v-5.25a.75.75 0 00-.75-.75h-1.5z"/></svg>`;
+  const pinIcon     = () => `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M11.536 3.464a5 5 0 010 7.072L8 14.07l-3.536-3.534a5 5 0 117.072-7.072v.001zm1.06 8.132a6.5 6.5 0 10-9.192 0l3.535 3.536a1.5 1.5 0 002.122 0l3.535-3.536zM8 9a2 2 0 100-4 2 2 0 000 4z"/></svg>`;
+  const mailIcon    = () => `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M1.75 2h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0114.25 14H1.75A1.75 1.75 0 010 12.25v-8.5C0 2.784.784 2 1.75 2zm11.541 1.5L8 8.807 2.709 3.5h10.582zM1.5 5.151v7.099c0 .138.112.25.25.25h12.5a.25.25 0 00.25-.25V5.151L8.38 10.765a.5.5 0 01-.76 0L1.5 5.151z"/></svg>`;
+
+  function socialLinks(user) {
+    const items = [];
+    if (user.blog) { const url = user.blog.startsWith('http')?user.blog:'https://'+user.blog; items.push({href:url,icon:linkIcon(),label:user.blog.replace(/^https?:\/\//,'')}); }
+    if (user.twitter_username) items.push({href:`https://twitter.com/${user.twitter_username}`,icon:twitterIcon(),label:'@'+user.twitter_username});
+    if (user.company) items.push({href:'#',icon:orgIcon(),label:user.company,nolink:true});
+    if (user.location) items.push({href:'#',icon:pinIcon(),label:user.location,nolink:true});
+    if (user.email) items.push({href:`mailto:${user.email}`,icon:mailIcon(),label:user.email});
+    if (!items.length) { $('socialCard').style.display='none'; return; }
+    $('socialCard').innerHTML = `<h3>Details</h3>` + items.map(it =>
+      it.nolink
+        ? `<span class="social-link" style="cursor:default">${it.icon}<span class="social-text">${it.label}</span></span>`
+        : `<a class="social-link" href="${it.href}" target="_blank">${it.icon}<span class="social-text">${it.label}</span></a>`
+    ).join('');
+  }
+
+  function buildActivity(repos) {
+    const months = {};
+    const now = new Date();
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+      months[`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`] = 0;
+    }
+    repos.forEach(r => {
+      if (r.pushed_at) {
+        const d = new Date(r.pushed_at);
+        const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        if (months[key] !== undefined) months[key]++;
+      }
+    });
+    const entries = Object.entries(months);
+    const max = Math.max(...entries.map(e=>e[1]), 1);
+    const total = entries.reduce((s,e)=>s+e[1],0);
+    const active = entries.filter(e=>e[1]>0).length;
+    const peak = entries.reduce((a,b)=>b[1]>a[1]?b:a, entries[0]);
+    $('activityPeriod').textContent = 'Last 12 months';
+    $('activitySummary').innerHTML = `
+      <div class="act-stat"><div class="num">${total}</div><div class="lbl">Pushes</div></div>
+      <div class="act-stat"><div class="num">${active}</div><div class="lbl">Active months</div></div>
+      <div class="act-stat"><div class="num">${peak[1]}</div><div class="lbl">Peak month</div></div>`;
+    const mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    $('activityGrid').innerHTML = entries.map(([key,count]) => {
+      const pct = Math.round((count/max)*100);
+      const [,m] = key.split('-');
+      return `<div class="activity-bar-row">
+        <span class="activity-label">${mn[parseInt(m)-1]}</span>
+        <div class="activity-bar-bg"><div class="activity-bar-fill" style="width:${pct}%"></div></div>
+        <span class="activity-count">${count}</span>
+      </div>`;
+    }).join('');
+  }
+
+  async function doSearch() {
+    const username = $('githubInput').value.trim();
+    if (!username) { $('errorMsg').textContent = 'Please enter a GitHub username.'; return; }
+    $('errorMsg').textContent = '';
+    $('searchBtn').disabled = true;
+    $('spinner').style.display = 'block';
+    $('mainContent').className = '';
+    try {
+      const [userRes, repoRes] = await Promise.all([
+        fetch(`https://api.github.com/users/${username}`),
+        fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`)
+      ]);
+      if (!userRes.ok) {
+        $('errorMsg').textContent = userRes.status === 404
+          ? `No user found for "${username}".`
+          : 'Something went wrong. Please try again.';
+        return;
+      }
+      const user = await userRes.json();
+      const repos = repoRes.ok ? await repoRes.json() : [];
+
+      $('avatar').src = user.avatar_url;
+      $('profileName').textContent = user.name || user.login;
+      $('profileLogin').textContent = '@' + user.login;
+      $('profileBio').textContent = user.bio || '';
+      $('statFollowers').textContent = fmtNum(user.followers);
+      $('statFollowing').textContent = fmtNum(user.following);
+      $('statRepos').textContent = fmtNum(user.public_repos);
+      $('profileLink').href = user.html_url;
+
+      socialLinks(user);
+      buildActivity(repos);
+
+      const top = [...repos].filter(r=>!r.fork).sort((a,b)=>b.stargazers_count-a.stargazers_count).slice(0,6);
+      $('topRepos').innerHTML = top.length
+        ? top.map(repoCard).join('')
+        : '<div class="empty">No original repositories found.</div>';
+
+      $('allReposLink').href = `https://github.com/${user.login}?tab=repositories`;
+      $('repoCount').textContent = repos.length + ' repos';
+      $('allRepos').innerHTML = repos.length
+        ? repos.map(repoCard).join('')
+        : '<div class="empty">No repositories found.</div>';
+
+      $('mainContent').className = 'visible';
+      $('githubInput').value = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch(e) {
+      $('errorMsg').textContent = 'Network error. Please check your connection.';
+    } finally {
+      $('searchBtn').disabled = false;
+      $('spinner').style.display = 'none';
+    }
+  }
+
+  $('githubInput').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+</script>
+</body>
+</html>
