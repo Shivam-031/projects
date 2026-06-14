@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 560" width="800" height="560" font-family="Inter, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0E3B66"/>
+      <stop offset="100%" style="stop-color:#1A5276"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#F59E0B;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#F59E0B;stop-opacity:0.05"/>
+    </linearGradient>
+    <clipPath id="cardClip">
+      <rect x="200" y="40" width="400" height="480" rx="28"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="560" fill="url(#bgGrad)"/>
+
+  <!-- Subtle ambient glow -->
+  <ellipse cx="400" cy="100" rx="200" ry="80" fill="#F59E0B" opacity="0.04"/>
+  <ellipse cx="650" cy="420" rx="120" ry="60" fill="#F59E0B" opacity="0.03"/>
+
+  <!-- Card background -->
+  <rect x="200" y="40" width="400" height="480" rx="28" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.09)" stroke-width="1"/>
+
+  <!-- ── HEADER ROW ── -->
+  <!-- City name -->
+  <text x="232" y="92" font-size="15" font-weight="600" fill="#F8FAFC" letter-spacing="0.3">New Delhi, IN</text>
+  <text x="232" y="110" font-size="12" fill="#94A3B8">Sun, 15 Jun</text>
+
+  <!-- Clock pill -->
+  <rect x="494" y="76" width="82" height="28" rx="14" fill="rgba(245,158,11,0.15)"/>
+  <text x="535" y="95" font-size="13" font-weight="500" fill="#F59E0B" text-anchor="middle" letter-spacing="1">12:34:07</text>
+
+  <!-- ── WEATHER HERO ── -->
+  <!-- Icon circle -->
+  <circle cx="400" cy="170" r="45" fill="rgba(245,158,11,0.12)"/>
+  <!-- Sun emoji representation -->
+  <circle cx="400" cy="170" r="18" fill="#F59E0B" opacity="0.9"/>
+  <!-- Sun rays -->
+  <g stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" opacity="0.7">
+    <line x1="400" y1="142" x2="400" y2="136"/>
+    <line x1="400" y1="198" x2="400" y2="204"/>
+    <line x1="372" y1="170" x2="366" y2="170"/>
+    <line x1="428" y1="170" x2="434" y2="170"/>
+    <line x1="380" y1="150" x2="375" y2="145"/>
+    <line x1="420" y1="190" x2="425" y2="195"/>
+    <line x1="420" y1="150" x2="425" y2="145"/>
+    <line x1="380" y1="190" x2="375" y2="195"/>
+  </g>
+
+  <!-- Condition label -->
+  <text x="400" y="232" font-size="11" font-weight="500" fill="#F59E0B" text-anchor="middle" letter-spacing="2">CLEAR SKY</text>
+
+  <!-- ── BIG TEMP ── -->
+  <text x="380" y="305" font-size="80" font-weight="300" fill="#F8FAFC" text-anchor="middle" letter-spacing="-4">34</text>
+  <text x="427" y="252" font-size="28" font-weight="400" fill="#94A3B8">°C</text>
+  <text x="400" y="322" font-size="12" fill="#94A3B8" text-anchor="middle">feels like 38°C</text>
+
+  <!-- ── STAT PILLS ── -->
+  <!-- Humidity -->
+  <rect x="232" y="340" width="108" height="72" rx="16" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <text x="286" y="363" font-size="18" text-anchor="middle" fill="#F8FAFC">💧</text>
+  <text x="286" y="383" font-size="14" font-weight="600" fill="#F8FAFC" text-anchor="middle">42%</text>
+  <text x="286" y="399" font-size="10" fill="#475569" text-anchor="middle" letter-spacing="1">HUMIDITY</text>
+
+  <!-- Wind -->
+  <rect x="346" y="340" width="108" height="72" rx="16" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <text x="400" y="363" font-size="18" text-anchor="middle" fill="#F8FAFC">💨</text>
+  <text x="400" y="383" font-size="14" font-weight="600" fill="#F8FAFC" text-anchor="middle">14 km/h</text>
+  <text x="400" y="399" font-size="10" fill="#475569" text-anchor="middle" letter-spacing="1">WIND</text>
+
+  <!-- Clouds -->
+  <rect x="460" y="340" width="108" height="72" rx="16" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <text x="514" y="363" font-size="18" text-anchor="middle" fill="#F8FAFC">☁️</text>
+  <text x="514" y="383" font-size="14" font-weight="600" fill="#F8FAFC" text-anchor="middle">8%</text>
+  <text x="514" y="399" font-size="10" fill="#475569" text-anchor="middle" letter-spacing="1">CLOUDS</text>
+
+  <!-- ── MIN / FEELS / MAX BAR ── -->
+  <rect x="232" y="424" width="336" height="48" rx="14" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <!-- Min -->
+  <text x="278" y="443" font-size="10" fill="#475569" text-anchor="middle" letter-spacing="1">MIN</text>
+  <text x="278" y="462" font-size="18" font-weight="600" fill="#F8FAFC" text-anchor="middle">28°</text>
+  <!-- Divider -->
+  <line x1="332" y1="432" x2="332" y2="464" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <!-- Feels like -->
+  <text x="400" y="443" font-size="10" fill="#475569" text-anchor="middle" letter-spacing="1">FEELS LIKE</text>
+  <text x="400" y="462" font-size="18" font-weight="600" fill="#F8FAFC" text-anchor="middle">38°</text>
+  <!-- Divider -->
+  <line x1="468" y1="432" x2="468" y2="464" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <!-- Max -->
+  <text x="522" y="443" font-size="10" fill="#475569" text-anchor="middle" letter-spacing="1">MAX</text>
+  <text x="522" y="462" font-size="18" font-weight="600" fill="#F8FAFC" text-anchor="middle">38°</text>
+
+  <!-- ── SUN TIMES ── -->
+  <!-- Sunrise card -->
+  <rect x="232" y="484" width="160" height="24" rx="8" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+  <text x="248" y="500" font-size="18">🌅</text>
+  <text x="276" y="496" font-size="9" fill="#475569" letter-spacing="1">SUNRISE</text>
+  <text x="276" y="508" font-size="12" font-weight="600" fill="#F8FAFC">05:26 AM</text>
+
+  <!-- Sunset card -->
+  <rect x="408" y="484" width="160" height="24" rx="8" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+  <text x="424" y="500" font-size="18">🌇</text>
+  <text x="452" y="496" font-size="9" fill="#475569" letter-spacing="1">SUNSET</text>
+  <text x="452" y="508" font-size="12" font-weight="600" fill="#F8FAFC">07:14 PM</text>
+
+  <!-- Theme label badge bottom -->
+  <rect x="300" y="530" width="200" height="22" rx="11" fill="rgba(245,158,11,0.12)" stroke="rgba(245,158,11,0.2)" stroke-width="1"/>
+  <text x="400" y="545" font-size="11" fill="#F59E0B" text-anchor="middle" font-weight="500" letter-spacing="0.5">🌞 Midday Theme — 12:34 PM</text>
+</svg>
