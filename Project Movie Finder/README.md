@@ -110,10 +110,10 @@ MIT License — free to use, modify, and distribute.
 - Typography: [Bebas Neue](https://fonts.google.com/specimen/Bebas+Neue) & [Inter](https://fonts.google.com/specimen/Inter) via Google Fonts
 
 <br/>
-<img src="/img/img1.png"/>
+<img src="./img/img1.png"/>
 <br/>
-<img src="/img/img2.png"/>
+<img src="./img/img2.png"/>
 <br/>
-<img src="/img/img3.png"/>
+<img src="./img/img3.png"/>
 <br/>
-<img src="/img/img4.png"/>
+<img src="./img/img4.png"/>
