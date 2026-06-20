@@ -1,0 +1,13 @@
+{
+  "name": "mindcheck-netlify",
+  "version": "2.0.0",
+  "description": "MindCheck — Netlify static site + serverless functions + MongoDB Atlas",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "cd netlify/functions && npm install"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  },
+  "engines": { "node": ">=18" }
+}
