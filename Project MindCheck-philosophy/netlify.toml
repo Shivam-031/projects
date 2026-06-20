@@ -1,0 +1,22 @@
+# ─── MindCheck — Netlify Configuration ────────────────────────────────────────
+
+[build]
+  publish   = "public"
+  functions = "netlify/functions"
+  command   = "cd netlify/functions && npm install"
+
+[functions]
+  node_bundler = "zisi"          # default zip bundler — reliable, no bundling surprises
+
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin  = "*"
+    Access-Control-Allow-Headers = "Content-Type, x-admin-token"
+    Access-Control-Allow-Methods = "GET, POST, DELETE, OPTIONS"
+
+# SPA catch-all — must be LAST
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200

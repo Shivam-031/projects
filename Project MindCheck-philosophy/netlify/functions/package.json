@@ -1,0 +1,11 @@
+{
+  "name": "mindcheck-functions",
+  "version": "1.0.0",
+  "description": "Netlify serverless functions for MindCheck",
+  "dependencies": {
+    "mongoose": "^8.2.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
